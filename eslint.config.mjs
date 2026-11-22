@@ -14,15 +14,15 @@ export default [
   { ignores: ["dist/", "node_modules/", ".astro/", "src/**/*.ts"] }, // TypeScript is checked by Astro
   js.configs.recommended,
   {
-    files: ["public/js/**/*.js"],
+    files: ["public/js/**/*.js", "public/admin/**/*.js"],
     languageOptions: { ecmaVersion: 2024, sourceType: "script", globals: { ...globals.browser, ...shared } },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^(_|ABOUT|TESTIMONIALS|PREVIEW_PLACEHOLDERS|CLIENTS|DISCIPLINES|FRAME|PREVIEW_SECONDS|INTRO|PROTECT|SITE|WORK|PHOTOS|DESIGN)$" }],
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^(_|ABOUT|TESTIMONIALS|PREVIEW_PLACEHOLDERS|CLIENTS|DISCIPLINES|FRAME|PREVIEW_SECONDS|INTRO|PROTECT|SITE|WORK|PHOTOS|DESIGN|ARCHIVE)$" }],
       "no-redeclare": "off",
     },
   },
   {
-    files: ["src/**/*.ts", "*.mjs", "tools/**/*.mjs"],
+    files: ["src/**/*.ts", "src/**/*.mjs", "*.mjs", "tools/**/*.mjs"],
     languageOptions: { ecmaVersion: 2024, sourceType: "module", globals: { ...globals.browser, ...globals.node } },
   },
 ];

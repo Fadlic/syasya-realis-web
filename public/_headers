@@ -22,3 +22,8 @@
 # scripts keep their names: always revalidate
 /js/*
   Cache-Control: public, max-age=0, must-revalidate
+
+# admin board: never cached, never indexed (also in robots.txt and a noindex meta tag)
+/admin/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

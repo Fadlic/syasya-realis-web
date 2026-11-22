@@ -2,8 +2,8 @@
    Studio — live features for the public website
    1) the contact form saves a copy of every enquiry (RPC submit_enquiry)
       before WhatsApp / email opens, and shows the reference number
-   2) anonymous visitors appear as "active" in the admin board (Realtime
-      presence) and can receive pop-up offers sent from it
+   2) anonymous visitors appear as "active" in the admin board (private
+      heartbeat, RPC visitor_ping) and can receive pop-up offers sent from it
    Runs only when config.js has a Supabase URL + anon key.
    Astro version: the form lives on the home page only, pop-ups work on every page.
    An offer accepted on another page is carried to /#contact (sessionStorage "sr-offer").
@@ -134,17 +134,25 @@
     if (!auth) { const r = await sb.auth.signInAnonymously(); if (r.error) return; auth = r.data.session; }
     const uid = auth.user.id;
 
-    // presence: what the admin board lists as "active visitors"
+    // heartbeat: what the admin board lists as "active visitors".
+    // Each visitor writes only its own row (RPC visitor_ping); only team members can read the list.
     const device = /Mobi|Android|iPhone/i.test(navigator.userAgent) ? "Mobile" : /iPad|Tablet/i.test(navigator.userAgent) ? "Tablet" : "Desktop";
     const browser = /Edg\//.test(navigator.userAgent) ? "Edge" : /Chrome\//.test(navigator.userAgent) ? "Chrome" : /Safari\//.test(navigator.userAgent) ? "Safari" : /Firefox\//.test(navigator.userAgent) ? "Firefox" : "Browser";
-    const since = Date.now(), returning = !!store.get("studio-seen"); store.set("studio-seen", "1");
+    /* "Returning" = seen on an earlier day/tab; kept for the whole visit so page 2 is not counted as a return */
+    const returning = session.get("sr-visit") ? session.get("sr-visit") === "Returning" : !!store.get("studio-seen");
+    session.set("sr-visit", returning ? "Returning" : "New"); store.set("studio-seen", "1");
     const PAGE_NAME = { about: "about us", guidelines: "brand guidelines", faq: "faq" }[document.body.dataset.page];
     const section = () => { if (PAGE_NAME) return PAGE_NAME;
       const s = $$("main section[id], main[id]:not([hidden])").filter(x => !x.closest("[hidden]")).find(x => { const r = x.getBoundingClientRect(); return r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.3; }); return s ? (s.id === "top" ? "Hero" : s.id.replace(/-/g, " ")) : "Hero"; };
-    const ch = sb.channel("site-visitors", { config: { presence: { key: uid } } });
-    const track = () => ch.track({ visitor_id: uid, page: section(), device: `${browser} · ${device}`, since, visit: returning ? "Returning" : "New" });
-    ch.subscribe(st => { if (st === "SUBSCRIBED") track(); });
-    let tmr; addEventListener("scroll", () => { clearTimeout(tmr); tmr = setTimeout(track, 1500); }, { passive: true });
+    let lastPage = "";
+    const ping = (force) => { if (document.visibilityState !== "visible") return; const page = section();
+      if (!force && page === lastPage) return; lastPage = page;
+      sb.rpc("visitor_ping", { p_page: page, p_device: `${browser} · ${device}`, p_visit: returning ? "Returning" : "New" }).then(() => {}, () => {}); };
+    ping(true);
+    setInterval(() => ping(true), 30000);                                               // still here
+    let tmr; addEventListener("scroll", () => { clearTimeout(tmr); tmr = setTimeout(() => ping(false), 1500); }, { passive: true });   // moved to another section
+    document.addEventListener("visibilitychange", () => ping(true));
+    // no "leave" call: moving between pages keeps the visit; a closed tab drops off the list after 90 s
 
     // pop-ups addressed to this visitor
     sb.channel(`deliveries-${uid}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "popup_deliveries", filter: `visitor_id=eq.${uid}` },

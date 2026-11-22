@@ -20,43 +20,18 @@ const SITE = {
   showreelPoster: "media/showreel.jpg",
 };
 
-const WORK = [
-  // size decides the frame: "wide" = MacBook (large), "" = iPad (medium), "narrow" = iPhone (small, for 9:16 videos).
-  // You can still force a frame with device:"macbook" | "ipad" | "iphone".
-  // Layout tip: keep each row adding up — wide + narrow, or two normal items side by side.
-  { title:"J Luxe — Teaser",              cat:"Fashion",   tags:["Teaser"],         video:"media/jluxe-teaser.mp4",   poster:"media/jluxe-teaser.jpg",   size:"wide",   device:"macbook"},
-  { title:"J Luxe — Instagram Teaser",    cat:"Fashion",   tags:["Instagram teaser"],      video:"media/jluxe-ig.mp4",       poster:"media/jluxe-ig.jpg",       size:"narrow", device:"iphone" },
-  { title:"Pilihan Hidup",                cat:"Short Film", tags:["Short film"],     video:"media/pilihan-hidup.mp4",  poster:"media/pilihan-hidup.jpg",  size:"",       device:"ipad"   },
-  { title:"Respect & Responsibility",     cat:"Short Film", tags:["Cyberbully PSA"], video:"media/respect.mp4",        poster:"media/respect.jpg",        size:"",       device:"ipad"   },
-  { title:"Unisel FSSR — Promo",          cat:"Education", tags:["Promo"],          video:"media/unisel-promo.mp4",   poster:"media/unisel-promo.jpg",   size:"narrow", device:"iphone" },
-  { title:"J Luxe — Ready-to-Wear",       cat:"Fashion",   tags:["Campaign"],       video:"media/jluxe-rtw.mp4",      poster:"media/jluxe-rtw.jpg",      size:"narrow",       device:"ipad"   },
-  { title:"Unisel FSSR",                  cat:"Education", tags:["Feature"],        video:"media/unisel.mp4",         poster:"media/unisel.jpg",         size:"narrow",       device:"ipad"   },
-  // Add your company profile, marketing montage and product videos like this:
-  // { title:"Client — Company Profile", cat:"Company Profile",  tags:["Corporate film"], video:"media/xxx.mp4", poster:"media/xxx.jpg", size:"wide" },
-  // { title:"Client — Brand Montage",   cat:"Marketing",        tags:["Montage"],        video:"media/xxx.mp4", poster:"media/xxx.jpg", size:"" },
-  // { title:"Client — Product Video",   cat:"Product",          tags:["Hero shots"],     video:"media/xxx.mp4", poster:"media/xxx.jpg", size:"narrow" },
-];
-
-// Graphic design pieces: media/design-01.jpg …  (cat shows under each piece; size "wide" = double width)
-const DESIGN = [
-  { src:"media/design-01.jpg", title:"Design piece 01", cat:"Branding",   size:"wide" },
-  { src:"media/design-02.jpg", title:"Design piece 02", cat:"Social kit", ar:"4/5"  },
-  { src:"media/design-03.jpg", title:"Design piece 03", cat:"Poster",     ar:"3/4"  },
-  { src:"media/design-04.jpg", title:"Design piece 04", cat:"Social kit", ar:"1/1"  },
-  { src:"media/design-05.jpg", title:"Design piece 05", cat:"Print",      ar:"3/4"  },
-  { src:"media/design-06.jpg", title:"Design piece 06", cat:"Key visual", ar:"4/5"  },
-];
+/* Archive (films, photos, designs): edited in src/data/archive.mjs. Astro renders it into the
+   page and embeds the same data as JSON, read here for the reel, the lightbox and "Show more photos". */
+const ARCHIVE = (() => { try { return JSON.parse(document.getElementById("archive-data")?.textContent || "{}"); } catch { return {}; } })();
+const WORK = ARCHIVE.work || [];
+const DESIGN = ARCHIVE.design || [];
+const PHOTOS = ARCHIVE.photos || [];
 
 const FRAME = "film";                            // "film" = film strip frames · "devices" = MacBook / iPad / iPhone
 const PREVIEW_SECONDS = 10;                     // hover preview length for videos
 const CLIENTS = ["J Luxe","Unisel"];
 const DISCIPLINES = ["Photography","Videography","Montage Design","Graphic Design"];   // the strip under the cover   // brands from the work above
 
-// 27 photos: media/photo-01.jpg … media/photo-27.jpg  (ar = aspect ratio for the placeholder)
-const PHOTOS = Array.from({length:27}, (_,i) => ({
-  src:`media/photo-${String(i+1).padStart(2,"0")}.jpg`,
-  ar:["2/3","3/2","2/3","4/5","3/2","2/3"][i % 6]
-}));
 /* ===================================================================== */
 
 (() => {
@@ -168,30 +143,31 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
   const cl = DISCIPLINES.concat(DISCIPLINES).map((c,i) => `<span class="${i%2?'s':''}">${c}</span>`).join("");
   $("#clientTrack").innerHTML = cl; $("#clientTrack2").innerHTML = cl;
 
-  /* gallery */
-  let shown = 0; const STEP = 12;
+  /* gallery: the first photos are already in the HTML (rendered at build); "Show more" adds the rest */
+  const gal = $("#gallery"), STEP = ARCHIVE.photoStep || 12;
+  /* an image that failed before this script ran never fires "error" again: check it once */
+  const guard = (im, swap) => { if (im.complete && !im.naturalWidth) swap(); else im.addEventListener("error", swap, { once: true }); };
+  const photoPh = (p, i) => { const x = ph(p.src.split("/").pop(), i); x.style.setProperty("--ar", p.ar); return x; };
+  [...gal.children].forEach((d, i) => { const im = d.querySelector("img"); if (im) guard(im, () => im.replaceWith(photoPh(PHOTOS[i], i)));
+    d.onclick = () => openLB("photo", i); });
+  let shown = gal.children.length;
   const addPhotos = () => {
     PHOTOS.slice(shown, shown + STEP).forEach((p, k) => {
       const i = shown + k, d = document.createElement("div"); d.className = "ph-item rv in"; d.style.setProperty("--ar", p.ar);
-      const im = img(p.src, p.src.split("/").pop(), i, `Photograph ${i+1}`);
-      im.onerror = () => { const x = ph(p.src.split("/").pop(), i); x.style.setProperty("--ar", p.ar); im.replaceWith(x); };
-      d.appendChild(im); d.onclick = () => openLB("photo", i); $("#gallery").appendChild(d);
+      const im = img(p.src, p.src.split("/").pop(), i, p.alt || `Photograph ${i+1}`);
+      im.onerror = () => im.replaceWith(photoPh(p, i));
+      d.appendChild(im); d.onclick = () => openLB("photo", i); gal.appendChild(d);
     });
     shown = Math.min(PHOTOS.length, shown + STEP);
     $("#moreBtn").style.display = shown >= PHOTOS.length ? "none" : "";
   };
-  addPhotos(); $("#moreBtn").onclick = addPhotos;
+  if (!shown) addPhotos(); else $("#moreBtn").style.display = shown >= PHOTOS.length ? "none" : "";
+  $("#moreBtn").onclick = addPhotos;
 
-  /* design grid */
-  DESIGN.forEach((d, i) => {
-    const a = document.createElement("article"); a.className = `d-item rv ${d.size||""}`; a.tabIndex = 0;
-    const shot = document.createElement("div"); shot.className = "shot"; if (d.ar) shot.style.setProperty("--ar", d.ar);
-    shot.appendChild(img(d.src, d.src.split("/").pop(), i+3, d.title));
-    a.appendChild(shot);
-    const meta = tx("div", "item-meta"), h = tx("h3", null, d.title); h.style.fontSize = "17px";
-    meta.append(h, tx("span", "mono", d.cat)); a.append(meta);
+  /* design grid: rendered at build; here it only gets its click / keyboard handlers */
+  [...$("#designGrid").children].forEach((a, i) => {
+    const im = a.querySelector("img"); if (im) guard(im, () => im.replaceWith(ph(DESIGN[i].src.split("/").pop(), i+3)));
     const open = () => openLB("design", i); a.onclick = open; a.onkeydown = e => { if (e.key === "Enter") open(); };
-    $("#designGrid").appendChild(a);
   });
 
   } /* end home page only */

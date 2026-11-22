@@ -1,5 +1,7 @@
 """Turn the Astro dist/ into a flat, relative-path copy for the artifact preview.
-Usage: python3 make_preview.py <dist> <out>"""
+Usage: python3 make_artifact_preview.py <dist> <out> [<admin-out>]
+<admin-out>: a second, separate preview of /admin in demo mode (no Supabase config, sample data);
+its views open from the URL hash (#inbox, #cal, #content, #pop, #rep, #set, #sys)."""
 import os, re, shutil, sys
 
 DIST, OUT = sys.argv[1], sys.argv[2]
@@ -19,6 +21,7 @@ SHIM = """<script>(function(){function mem(){var m={};return{getItem:function(k)
 def fix_links(html):
     html = re.sub(r'<script[^>]*src="/js/(config|live)\.js"[^>]*></script>\s*', "", html)
     html = re.sub(r'(href|src)="/_astro/', r'\1="assets/', html)
+    html = html.replace("url(/_astro/", "url(assets/")   # small stylesheets Astro inlines into the page
     html = re.sub(r'(href|src)="/(brand|media|js)/', r'\1="\2/', html)
     html = re.sub(r'href="/#', 'href="index.html#', html)
     html = html.replace('href="/"', 'href="index.html"')
@@ -26,6 +29,8 @@ def fix_links(html):
         html = re.sub(rf'href="{r}/?"', f'href="{f}"', html)
         html = re.sub(rf'href="{r}/?#', f'href="{f}#', html)
     html = html.replace("<head>", "<head>" + SHIM, 1)
+    # preview only: direct links to sub-pages from the artifact URL hash (the artifact URL always opens index.html)
+    html = html.replace("<head>", r"""<head><script>(function(){var m={"#about-us":"about.html","#brand-guidelines":"guidelines.html","#faq":"faq.html","#not-found":"404.html"};if(m[location.hash]&&!/(about|guidelines|faq|404)\.html$/.test(location.pathname))location.replace(m[location.hash]);})();</script>""", 1)
     return html
 
 PAGES["404"] = "404.html"
@@ -53,3 +58,25 @@ for root, _, fs in os.walk(OUT):
             t = open(os.path.join(root, f), encoding="utf-8").read()
             left += [(f, m) for m in re.findall(r'(?:href|src)="(/[^"]*)"|url\((/[^)]*)\)|location\.\w+\s*=\s*"(/[^"]*)"', t) if any(m)]
 print("absolute refs left:", left or "none")
+
+# ---------- optional: admin board preview (demo mode) ----------
+if len(sys.argv) > 3:
+    AOUT = sys.argv[3]
+    shutil.rmtree(AOUT, ignore_errors=True)
+    shutil.copytree(os.path.join(DIST, "_astro"), os.path.join(AOUT, "assets"))
+    shutil.copytree(os.path.join(DIST, "brand"), os.path.join(AOUT, "brand"))
+    shutil.copytree(os.path.join(DIST, "admin"), os.path.join(AOUT, "admin"))
+    os.remove(os.path.join(AOUT, "admin", "index.html"))
+    html = open(os.path.join(DIST, "admin", "index.html"), encoding="utf-8").read()
+    html = re.sub(r'<script[^>]*src="/js/config\.js"[^>]*></script>\s*', "", html)   # no config = demo mode
+    html = re.sub(r'(href|src)="/_astro/', r'\1="assets/', html)
+    html = html.replace("url(/_astro/", "url(assets/")
+    html = re.sub(r'(href|src)="/(brand|admin)/', r'\1="\2/', html)
+    html = html.replace("<head>", "<head>" + SHIM, 1)
+    open(os.path.join(AOUT, "index.html"), "w", encoding="utf-8").write(html)
+    for f in os.listdir(os.path.join(AOUT, "assets")):
+        if f.endswith(".css"):
+            q = os.path.join(AOUT, "assets", f)
+            t = open(q, encoding="utf-8").read().replace("url(/_astro/", "url(./")
+            open(q, "w", encoding="utf-8").write(t)
+    print("admin preview:", AOUT)

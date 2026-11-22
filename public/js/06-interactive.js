@@ -34,13 +34,16 @@
   if ($('#proj')) {   /* home page only (Astro) */
   const proj = $('#proj'), track = $('#projTrack'), n = WORK.length; proj.style.setProperty('--n', n);
   $('#filters').style.display = 'none';
-  const frames = WORK.map((w, i) => { const f = document.createElement('div'); f.className = 'pf'; f.tabIndex = 0; f.setAttribute('role', 'button'); f.setAttribute('aria-label', `Play ${w.title}`);
-    const no = String(i + 1).padStart(2, '0'); f.innerHTML = `<span class="edge">S&amp;R 400 <b>▸ ${no}</b> ${no}A</span><div class="fr"></div>`;
-    const fr = f.querySelector('.fr'), phd = document.createElement('div'); phd.className = 'ph'; phd.dataset.label = (w.video || '').split('/').pop(); fr.appendChild(phd);
-    const v = document.createElement('video'); Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'metadata' }); if (w.poster) v.poster = w.poster;
-    const so = document.createElement('source'); so.src = w.video; so.type = 'video/mp4'; so.onerror = () => v.remove(); v.addEventListener('loadeddata', () => phd.remove()); v.appendChild(so); fr.appendChild(v);
+  /* the frames are rendered at build (src/pages/index.astro); here they get their media checks and handlers */
+  const frames = [...track.children];
+  frames.forEach((f, i) => {
+    const phd = f.querySelector('.ph'), v = f.querySelector('video');
+    if (v) { const gone = () => v.remove(), ready = () => phd && phd.remove();
+      v.preload = 'metadata';   // the HTML says "none" so the reel does not compete with the first view
+      if (v.readyState >= 2) ready(); else v.addEventListener('loadeddata', ready, { once: true });
+      if (v.networkState === 3) gone(); else v.querySelector('source')?.addEventListener('error', gone, { once: true }); }
     const open = () => window.__openLB && window.__openLB('video', i); f.addEventListener('click', open); f.addEventListener('keydown', e => { if (e.key === 'Enter') open(); });
-    track.appendChild(f); return f; });
+  });
   let cur = -1;
   const size = () => { const fw = Math.min(innerWidth < 700 ? innerWidth * .84 : innerWidth * .58, 980); frames.forEach(f => f.style.setProperty('--fw', fw + 'px')); return fw; };
   size(); addEventListener('resize', () => { size(); onScroll(); });

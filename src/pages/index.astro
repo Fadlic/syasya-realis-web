@@ -1,8 +1,14 @@
 ---
 import Base from "../layouts/Base.astro";
+import { WORK, PHOTOS, DESIGN, PHOTO_STEP } from "../data/archive.mjs";
+/* data for the browser scripts; "<" escaped so the JSON can never close the tag */
+const archiveJson = JSON.stringify({ work: WORK, photos: PHOTOS, design: DESIGN, photoStep: PHOTO_STEP }).replace(/</g, "\\u003c");
+const no = (i) => String(i + 1).padStart(2, "0");
+const file = (p) => (p || "").split("/").pop();
 ---
 <Base title="Syasya&Realis — Visual Narratives & Moving Art" page="index" intro>
 <main id="top">
+  <script type="application/json" id="archive-data" is:inline set:html={archiveJson}></script>
   <!-- HERO -->
   <section class="hero" style="padding:0">
     <div class="hero-media" id="heroMedia"></div>
@@ -47,7 +53,9 @@ import Base from "../layouts/Base.astro";
     <div class="proj" id="proj">
       <div class="proj-stick">
         <div class="beam" aria-hidden="true"></div><canvas class="dust" id="dust" aria-hidden="true"></canvas>
-        <div class="proj-track" id="projTrack"></div>
+        <div class="proj-track" id="projTrack">{WORK.map((w, i) => (
+          <div class="pf" tabindex="0" role="button" aria-label={`Play ${w.title}`}><span class="edge">S&amp;R 400 <b>▸ {no(i)}</b> {no(i)}A</span><div class="fr"><div class="ph" data-label={file(w.video)}></div><video muted loop playsinline preload="none" poster={w.poster || undefined}><source src={w.video} type="video/mp4"></video></div></div>
+        ))}</div>
         <div class="proj-info"><span class="mono" id="projNo">01 / 07</span><h3 id="projTitle"></h3><span class="mono" id="projCat"></span></div>
         <div class="proj-bar" aria-hidden="true"><i id="projBar"></i></div>
         <span class="proj-hint mono">Scroll to advance the reel</span>
@@ -63,7 +71,9 @@ import Base from "../layouts/Base.astro";
       <h2 class="h2 rv">Frames that <span class="serif">sell.</span></h2>
       <p class="lead rv" style="max-width:36ch">Product, fashion, portrait and event photography — <em class="hl">lit, shot and retouched</em> for campaigns and catalogues.</p>
     </div>
-    <div class="gallery" id="gallery"></div>
+    <div class="gallery" id="gallery">{PHOTOS.slice(0, PHOTO_STEP).map((p) => (
+      <div class="ph-item rv in" style={`--ar:${p.ar}`}><img alt={p.alt} loading="lazy" decoding="async" src={p.src}></div>
+    ))}</div>
     <div class="more"><button class="btn" id="moreBtn">Show more photos</button></div>
   </section>
 
@@ -74,7 +84,9 @@ import Base from "../layouts/Base.astro";
       <h2 class="h2 rv">Design that <span class="serif">speaks.</span></h2>
       <p class="lead rv" style="max-width:38ch">Brand identity, social media kits, posters, brochures and campaign key visuals — <em class="hl">designed to match the films and photos we produce.</em></p>
     </div>
-    <div class="design-grid" id="designGrid"></div>
+    <div class="design-grid" id="designGrid">{DESIGN.map((d) => (
+      <article class={`d-item rv ${d.size || ""}`} tabindex="0"><div class="shot" style={d.ar ? `--ar:${d.ar}` : undefined}><img alt={d.alt || d.title} loading="lazy" decoding="async" src={d.src}></div><div class="item-meta"><h3 style="font-size:17px">{d.title}</h3><span class="mono">{d.cat}</span></div></article>
+    ))}</div>
   </section>
 
   <!-- MANIFESTO -->
