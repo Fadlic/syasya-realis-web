@@ -1,0 +1,45 @@
+---
+/* Kerangka semua halaman: <head>, header, footer, lightbox, pop-up, skrip.
+   Dipecah dari V4.4 (satu file + router hash) oleh tools/split_astro.py. */
+import "../styles/site.css";
+import Progress from "../components/Progress.astro";
+import Intro from "../components/Intro.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+const { title, page, intro = false } = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/brand/favicon.png">
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+    <meta property="og:title" content="Syasya&amp;Realis — Visual Narratives &amp; Moving Art">
+    <meta property="og:description" content="A visual practice in reality, rhythm, and refined expression. An independent creative practice devoted to imagery that lingers.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0A0807">
+    <meta name="description" content="Syasya&amp;Realis — an independent multidisciplinary creative studio by Syasya Ahmad: photography, videography, montage and graphic design.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..600&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Libre+Bodoni:ital,wght@0,400..700;1,400..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>{title}</title>
+  </head>
+  <body class="v2 duo ref sr" data-page={page}>
+    <Progress />
+    {intro && <Intro />}
+    <Header />
+    <slot />
+    <Footer />
+    <script is:inline src="/js/01-settings.js"></script>
+    <script is:inline src="/js/02-site.js"></script>
+    <script is:inline src="/js/03-pages.js"></script>
+    <script is:inline src="/js/04-protect.js"></script>
+    <script is:inline src="/js/05-intro.js"></script>
+    <script is:inline src="/js/config.js"></script>
+    <script is:inline src="/js/live.js"></script>
+    <script is:inline src="/js/06-interactive.js"></script>
+    <script is:inline src="/js/07-identity.js"></script>
+    <script is:inline src="/js/08-logo.js"></script>
+  </body>
+</html>
