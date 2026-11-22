@@ -960,16 +960,18 @@
       )
     );
     $("#cmPform").replaceChildren(
-      h("div", { class: "card-h", style: "margin:0" }, h("h2", {}, g.group), h("span", { class: "hint" }, L.name)),
-      ...g.fields.map(field),
-      g.list ? listEditor(g.list) : null,
-      g.list === "testimonials"
-        ? h(
-            "p",
-            { class: "hint" },
-            "Real client quotes only. The Testimonials section on About stays hidden while this list is empty."
-          )
-        : null
+      ...[
+        h("div", { class: "card-h", style: "margin:0" }, h("h2", {}, g.group), h("span", { class: "hint" }, L.name)),
+        ...g.fields.map(field),
+        g.list ? listEditor(g.list) : null,
+        g.list === "testimonials"
+          ? h(
+              "p",
+              { class: "hint" },
+              "Real client quotes only. The Testimonials section on About stays hidden while this list is empty."
+            )
+          : null,
+      ].filter(Boolean) // replaceChildren would print "null" for an empty slot
     );
   };
 
