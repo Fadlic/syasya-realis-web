@@ -1046,3 +1046,18 @@
   body.ref .cons-copy article{border-top-color:var(--line)}
   body.ref .app .ph-wrap{box-shadow:0 30px 60px -34px rgba(226,10,33,.45)}
   @media (max-width:760px){body.ref #ab-mark,body.ref #brand-guidelines section:has(> .ci-pal){margin-left:10px;margin-right:10px}}
+
+  /* ===== Media grayscale → colour reveal (archive content only; intro, hero & lightbox untouched) ===== */
+  #projTrack .fr > video,#grid .item :is(video,img),#gallery .ph-item > img,#designGrid .shot > img{filter:grayscale(1) contrast(1.05)}
+  #projTrack .fr > video,#gallery .ph-item > img{transition:filter .8s var(--ease)}
+  #grid .item :is(video,img),#designGrid .shot > img{transition:transform 1.1s var(--ease),filter .8s var(--ease)}
+  @media (hover:hover){
+    #projTrack .pf:hover .fr > video,#grid .item:hover :is(video,img),#gallery .ph-item:hover > img,#designGrid .d-item:hover .shot > img{filter:none}
+  }
+  #projTrack .pf:focus-visible .fr > video,#grid .item:focus-within :is(video,img),#designGrid .d-item:focus-visible .shot > img{filter:none}
+  @media (hover:none){
+    #projTrack .pf.on .fr > video,#grid .item.lit :is(video,img),#gallery .ph-item.lit > img,#designGrid .d-item.lit .shot > img{filter:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #projTrack .fr > video,#grid .item :is(video,img),#gallery .ph-item > img,#designGrid .shot > img{transition:filter .2s linear}
+  }
