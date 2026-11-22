@@ -1,0 +1,10 @@
+// Cloudflare Workers (static assets) — the site is pre-rendered by `astro build` into ./dist.
+// No Worker code and no Astro adapter needed. Deploy: `npx astro build && npx wrangler deploy`,
+// or connect the GitHub repo in Workers Builds (build: `npm run build`, deploy: `npx wrangler deploy`).
+{
+  "name": "syasya-realis-web",
+  "compatibility_date": "2026-11-22",
+  "assets": {
+    "directory": "./dist"
+  }
+}
