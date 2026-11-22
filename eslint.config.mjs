@@ -5,9 +5,19 @@ import js from "@eslint/js";
 import globals from "globals";
 
 const shared = {
-  SITE: "readonly", WORK: "readonly", PHOTOS: "readonly", DESIGN: "readonly", ABOUT: "readonly",
-  TESTIMONIALS: "readonly", PREVIEW_PLACEHOLDERS: "readonly", CLIENTS: "readonly", DISCIPLINES: "readonly",
-  FRAME: "readonly", PREVIEW_SECONDS: "readonly", INTRO: "readonly", PROTECT: "readonly",
+  SITE: "readonly",
+  WORK: "readonly",
+  PHOTOS: "readonly",
+  DESIGN: "readonly",
+  ABOUT: "readonly",
+  TESTIMONIALS: "readonly",
+  PREVIEW_PLACEHOLDERS: "readonly",
+  CLIENTS: "readonly",
+  DISCIPLINES: "readonly",
+  FRAME: "readonly",
+  PREVIEW_SECONDS: "readonly",
+  INTRO: "readonly",
+  PROTECT: "readonly",
 };
 
 export default [
@@ -17,7 +27,14 @@ export default [
     files: ["public/js/**/*.js", "public/admin/**/*.js"],
     languageOptions: { ecmaVersion: 2024, sourceType: "script", globals: { ...globals.browser, ...shared } },
     rules: {
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^(_|ABOUT|TESTIMONIALS|PREVIEW_PLACEHOLDERS|CLIENTS|DISCIPLINES|FRAME|PREVIEW_SECONDS|INTRO|PROTECT|SITE|WORK|PHOTOS|DESIGN|ARCHIVE)$" }],
+      "no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern:
+            "^(_|ABOUT|TESTIMONIALS|PREVIEW_PLACEHOLDERS|CLIENTS|DISCIPLINES|FRAME|PREVIEW_SECONDS|INTRO|PROTECT|SITE|WORK|PHOTOS|DESIGN|ARCHIVE)$",
+        },
+      ],
       "no-redeclare": "off",
     },
   },
