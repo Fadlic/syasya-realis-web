@@ -1498,6 +1498,22 @@ ul.check.open li::before {
   transform: translateX(-50%);
 }
 
+/* warning 1 minute before the automatic sign-out */
+.idle-warn {
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 32px));
+  background: var(--rose);
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  z-index: 260;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
 /* ---------- sign-in gate (live mode) ---------- */
 body.locked > :not(.gate, script, style) {
   visibility: hidden;

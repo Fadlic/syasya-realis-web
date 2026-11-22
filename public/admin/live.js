@@ -57,6 +57,40 @@
     settings = {},
     rt = null,
     idleTimer = null;
+  /* last activity, shared by all admin tabs of this browser */
+  const ls = {
+    get: k => {
+      try {
+        return localStorage.getItem(k);
+      } catch {
+        return null;
+      }
+    },
+    set: (k, v) => {
+      try {
+        localStorage.setItem(k, String(v));
+      } catch {
+        /* storage blocked: the in-page timer still works */
+      }
+    },
+  };
+  const idleMin = () => +settings.session_timeout_min || +ls.get("studio-admin-idle-min") || 15;
+  const idle = {
+    last: () => +ls.get("studio-admin-active") || 0,
+    touch: (t = Date.now()) => ls.set("studio-admin-active", t),
+    setMin: m => ls.set("studio-admin-idle-min", m),
+    expired: () => idle.last() > 0 && Date.now() - idle.last() > idleMin() * 60000,
+    /* this device only — the team's other signed-in devices stay signed in */
+    signOut: async () => {
+      try {
+        sessionStorage.setItem("studio-admin-idle-out", String(idleMin()));
+      } catch {
+        /* no notice after reload, sign-out still happens */
+      }
+      ls.set("studio-admin-active", 0);
+      await sb.auth.signOut({ scope: "local" });
+    },
+  };
   const loader = () =>
     window.__loadSupabase
       ? Promise.resolve(window.__loadSupabase)
@@ -104,6 +138,10 @@
     const {
       data: { session },
     } = await sb.auth.getSession();
+    if (session && !session.user.is_anonymous && idle.expired()) {
+      await idle.signOut();
+      return stepLogin();
+    }
     if (!session || session.user.is_anonymous) {
       if (session) await sb.auth.signOut();
       return stepLogin();
@@ -154,9 +192,23 @@
         $("#g-pw").value = "";
         return $("#g-pw").focus();
       }
+      idle.touch();
       route();
     });
-    screen("Sign in", "Team members only. You'll be asked for a code from your authenticator app.", f);
+    let out = null;
+    try {
+      out = sessionStorage.getItem("studio-admin-idle-out");
+      sessionStorage.removeItem("studio-admin-idle-out");
+    } catch {
+      /* storage blocked */
+    }
+    screen(
+      "Sign in",
+      out
+        ? `You were signed out after ${out} minute${out === "1" ? "" : "s"} without activity. Sign in again to continue.`
+        : "Team members only. You'll be asked for a code from your authenticator app.",
+      f
+    );
   }
 
   function stepVerify(factorId) {
@@ -568,20 +620,48 @@
     });
   }
 
-  /* ---------- auto sign-out after inactivity ---------- */
+  /* ---------- auto sign-out after inactivity ----------
+     The time of the last activity is kept in localStorage, so the limit also holds after the
+     tab was closed, the laptop slept or another admin tab was used (all tabs share it).
+     Limit: Settings → "Sign out after inactivity" (default 15 minutes). */
   function startIdle() {
-    const mins = +settings.session_timeout_min || 60;
-    const reset = () => {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(async () => {
-        await sb.auth.signOut();
-        location.reload();
-      }, mins * 60000);
+    idle.setMin(idleMin());
+    let lastWrite = 0,
+      warn = null;
+    const hideWarn = () => warn && (warn.remove(), (warn = null));
+    const mark = () => {
+      const n = Date.now();
+      hideWarn();
+      if (n - lastWrite > 5000) {
+        lastWrite = n;
+        idle.touch(n);
+      }
     };
-    ["click", "keydown", "mousemove", "scroll", "touchstart"].forEach(e =>
-      addEventListener(e, reset, { passive: true })
+    ["click", "keydown", "mousemove", "scroll", "touchstart", "input"].forEach(e =>
+      addEventListener(e, mark, { passive: true, capture: true })
     );
-    reset();
+    idle.touch();
+    const check = async () => {
+      idle.setMin(idleMin());
+      const left = idle.last() + idleMin() * 60000 - Date.now();
+      if (left <= 0) {
+        clearInterval(idleTimer);
+        await idle.signOut();
+        location.reload();
+      } else if (left <= 60000) {
+        if (!warn) {
+          warn = el("div", { class: "idle-warn", role: "alert" });
+          document.body.append(warn);
+        }
+        warn.textContent = `No activity — signing out in ${Math.ceil(left / 1000)} s. Move the mouse or press a key to stay signed in.`;
+      } else hideWarn();
+    };
+    idleTimer = setInterval(check, 5000);
+    document.addEventListener("visibilitychange", () => document.visibilityState === "visible" && check());
+    /* signed out in another tab (or by the idle limit there): close this one too */
+    sb.auth.onAuthStateChange(ev => {
+      if (ev === "SIGNED_OUT") location.reload();
+    });
   }
 
   /* ---------- settings form <-> database (only settings that are really used) ---------- */
