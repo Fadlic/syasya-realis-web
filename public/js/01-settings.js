@@ -192,30 +192,41 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
   /* counters */
   const countUp = (el, n) => { let k = 0; const step = () => { k++; el.textContent = Math.min(n, Math.round(n*k/30)); if (k < 30) requestAnimationFrame(step); }; step(); };
 
-  /* lightbox */
-  const lb = $("#lb"), stage = $("#lbStage"); let mode, idx;
+  /* lightbox — "screening room": theme gradient backdrop, counter, viewfinder frame, filmstrip */
+  const lb = $("#lb"), stage = $("#lbStage"), strip = $("#lbStrip"); let mode, idx;
+  const art = (m, i) => m === "video" ? WORK[i].poster : m === "design" ? DESIGN[i].src : PHOTOS[i].src;
+  const buildStrip = list => { if (!strip) return; strip.innerHTML = ""; strip.hidden = mode === "reel" || list.length < 2; if (strip.hidden) return;
+    list.forEach((_, i) => { const t = document.createElement("button"); t.type = "button"; t.className = "lb-th"; t.setAttribute("aria-label", `Open ${i+1} of ${list.length}`);
+      const s = art(mode, i); if (s) t.style.backgroundImage = `url("${s}")`; t.onclick = () => { idx = i; render(); }; strip.appendChild(t); }); };
   const render = () => {
-    stage.innerHTML = "";
+    stage.innerHTML = ""; stage.classList.remove("in"); void stage.offsetWidth; stage.classList.add("in");
+    const frame = document.createElement("div"); frame.className = "lb-frame";
     if (mode === "reel") {
-      $("#lbTitle").textContent = `${SITE.name} — Showreel`;
-      stage.appendChild(vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4 not uploaded yet", 0, {controls:true, autoplay:true, muted:false, loop:false}));
-      return;
+      $("#lbEye").textContent = "Showreel"; $("#lbTitle").textContent = SITE.name; $("#lbCount").textContent = "";
+      frame.appendChild(vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4 not uploaded yet", 0, {controls:true, autoplay:true, muted:false, loop:false}));
+      stage.appendChild(frame); return;
     }
     const list = mode === "video" ? WORK : mode === "design" ? DESIGN : PHOTOS;
-    if (mode === "video") { const w = WORK[idx]; $("#lbTitle").textContent = `${w.title} · ${w.cat}`;
-      stage.appendChild(vid(w.video, w.poster, `${w.video.split("/").pop()} not uploaded yet`, idx+1, {controls:true, autoplay:true, muted:false, loop:false}));
-    } else if (mode === "design") { const d = DESIGN[idx]; $("#lbTitle").textContent = `${d.title} · ${d.cat}`;
-      stage.appendChild(img(d.src, `${d.src.split("/").pop()} not uploaded yet`, idx+3, d.title));
-    } else { $("#lbTitle").textContent = `Photograph ${idx+1} / ${PHOTOS.length}`;
-      stage.appendChild(img(PHOTOS[idx].src, `${PHOTOS[idx].src.split("/").pop()} not uploaded yet`, idx, `Photograph ${idx+1}`)); }
+    if (mode === "video") { const w = WORK[idx]; $("#lbEye").textContent = `Film · ${w.cat}`; $("#lbTitle").textContent = w.title;
+      frame.appendChild(vid(w.video, w.poster, `${w.video.split("/").pop()} not uploaded yet`, idx+1, {controls:true, autoplay:true, muted:false, loop:false}));
+    } else if (mode === "design") { const d = DESIGN[idx]; $("#lbEye").textContent = `Design · ${d.cat}`; $("#lbTitle").textContent = d.title;
+      frame.appendChild(img(d.src, `${d.src.split("/").pop()} not uploaded yet`, idx+3, d.title));
+    } else { $("#lbEye").textContent = "Stills"; $("#lbTitle").textContent = `Photograph ${idx+1}`;
+      frame.appendChild(img(PHOTOS[idx].src, `${PHOTOS[idx].src.split("/").pop()} not uploaded yet`, idx, `Photograph ${idx+1}`)); }
+    frame.insertAdjacentHTML("beforeend", '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>');
+    stage.appendChild(frame);
+    $("#lbCount").innerHTML = `<b>${String(idx+1).padStart(2,"0")}</b> / ${String(list.length).padStart(2,"0")}`;
     const prev = document.createElement("button"), next = document.createElement("button");
     prev.className = "lb-nav lb-prev"; next.className = "lb-nav lb-next"; prev.textContent = "←"; next.textContent = "→";
     prev.setAttribute("aria-label","Previous"); next.setAttribute("aria-label","Next");
     prev.onclick = () => { idx = (idx - 1 + list.length) % list.length; render(); };
     next.onclick = () => { idx = (idx + 1) % list.length; render(); };
     stage.append(prev, next);
+    if (strip && !strip.hidden) { [...strip.children].forEach((t, i) => t.classList.toggle("on", i === idx));
+      const t = strip.children[idx]; if (t) strip.scrollTo({ left: t.offsetLeft - (strip.clientWidth - t.offsetWidth) / 2, behavior: "smooth" }); }   // scroll the strip only, never the page
   };
-  const openLB = window.__openLB = (m, i=0) => { mode = m; idx = i; lb.classList.add("open"); document.body.style.overflow = "hidden"; render(); };
+  const openLB = window.__openLB = (m, i=0) => { mode = m; idx = i; lb.classList.add("open"); document.body.style.overflow = "hidden";
+    buildStrip(m === "video" ? WORK : m === "design" ? DESIGN : m === "photo" ? PHOTOS : []); render(); };
   const closeLB = () => { lb.classList.remove("open"); stage.innerHTML = ""; document.body.style.overflow = ""; };
   $("#lbClose").onclick = closeLB;
   lb.addEventListener("click", e => { if (e.target === lb || e.target === stage) closeLB(); });

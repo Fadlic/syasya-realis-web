@@ -17,8 +17,13 @@
 
 <!-- lightbox -->
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Media viewer">
-  <div class="lb-top"><span class="mono" id="lbTitle"></span><button class="x" id="lbClose" aria-label="Close">✕</button></div>
+  <div class="lb-amb" aria-hidden="true"></div>
+  <div class="lb-top">
+    <div class="lb-cap"><span class="mono lb-eye" id="lbEye"></span><span class="lb-ttl" id="lbTitle"></span></div>
+    <div class="lb-side"><span class="mono lb-count" id="lbCount"></span><button class="x" id="lbClose" aria-label="Close">✕</button></div>
+  </div>
   <div class="lb-stage" id="lbStage"></div>
+  <div class="lb-foot"><div class="lb-strip" id="lbStrip" aria-label="All items"></div><span class="mono lb-keys">← → browse · Esc close</span></div>
 </div>
 
 <!-- ===== pop-up offer: content arrives from the admin board ===== -->
