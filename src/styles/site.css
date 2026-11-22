@@ -467,6 +467,7 @@
   .pcard .cta:hover{background:var(--detail)}
   .pcard .fine{font-size:12.5px;color:var(--ink-3);margin-top:12px;text-align:center}
   .applied{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;border:1px solid rgba(226,10,33,.55);background:rgba(226,10,33,.08);border-radius:12px;padding:12px 14px}
+  .applied[hidden]{display:none}
   .applied b{font-family:var(--mono);letter-spacing:.08em;color:var(--rose)}
   .applied button{font-size:13px;color:var(--ink-3);text-decoration:underline}
   .pvbar{position:fixed;z-index:160;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:6px;align-items:center;padding:6px;border-radius:99px;background:rgba(10,8,7,.92);border:1px solid var(--line-2);font-size:13px}
