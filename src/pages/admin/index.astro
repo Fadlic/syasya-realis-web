@@ -305,7 +305,7 @@ const contentJson = jsonForScript({ defaults: DEFAULTS, fields: PAGE_FIELDS, lan
         <div class="sys-p" id="t-log" role="tabpanel" hidden>
           <div class="card"><div class="card-h"><div class="seg" role="group" aria-label="Filter log" id="log-f"></div><button class="btn sm" id="log-csv">Copy as CSV</button></div>
             <table class="tbl"><caption class="sr">Activity log</caption><thead><tr><th scope="col">Time</th><th scope="col" class="l">Who</th><th scope="col" class="l">Action</th><th scope="col" class="l">Device</th></tr></thead><tbody id="log-rows"></tbody></table>
-            <p class="hint" style="margin-top:10px">Written by the database itself. Entries cannot be edited or deleted from the board, even by the Owner. The latest 500 entries are shown.</p></div>
+            <p class="hint" style="margin-top:10px">Written by the database itself. Entries cannot be edited or deleted from the board, even by the Owner. Entries older than 12 months are deleted automatically every night; the latest 500 are shown.</p></div>
         </div>
 
         <!-- active users -->
