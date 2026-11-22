@@ -1,26 +1,34 @@
 /* =====================================================================
-   SETTINGS — edit here. Name, contacts, and media file paths.
-   Put media files next to this page in a folder named "media/".
+   SETTINGS — contact details, About facts, testimonials, intro and
+   protection come from the admin Content panel (built into the page as
+   JSON #site-data; built-in values in src/data/content.mjs). Archive media:
+   #archive-data on the home page. Only fixed brand values stay here.
    ===================================================================== */
-/* About page facts — leave a value "" to hide that row on the live site */
-const ABOUT = { based: "", founded: "", team: "" };
-/* Testimonials — real client quotes only. The section is hidden on the live site while this list is empty.
-   { quote:"…", name:"Full name", role:"Role, Company" } */
-const TESTIMONIALS = [];
+const SITE_DATA = (() => {
+  try {
+    return JSON.parse(document.getElementById("site-data")?.textContent || "{}");
+  } catch {
+    return {};
+  }
+})();
+/* About page facts — an empty value hides that row on the live site */
+const ABOUT = Object.assign({ based: "", founded: "", team: "" }, SITE_DATA.about);
+/* Testimonials — real client quotes only ({ quote, name, role }). The section is hidden while empty. */
+const TESTIMONIALS = Array.isArray(SITE_DATA.testimonials) ? SITE_DATA.testimonials : [];
 const PREVIEW_PLACEHOLDERS = false; // true = show empty slots (layout preview only)
 
 const SITE = {
   name: "Syasya&Realis", // company name
   short: "S&R", // short mark (film strip edge print)
-  email: "hello@studio.com",
-  instagram: "#",
-  whatsapp: "#",
-  whatsappNumber: "", // e.g. "6281234567890" — used by "Send via WhatsApp" (preview v2)
+  email: SITE_DATA.email || "hello@studio.com",
+  instagram: SITE_DATA.instagram || "#",
+  whatsapp: SITE_DATA.whatsapp || "#",
+  whatsappNumber: SITE_DATA.whatsappNumber || "", // used by "Send via WhatsApp"
   showreel: "media/showreel.mp4", // hero background + showreel
   showreelPoster: "media/showreel.jpg",
 };
 
-/* Archive (films, photos, designs): edited in src/data/archive.mjs. Astro renders it into the
+/* Archive (films, photos, designs): edited in the admin Content panel (built-in: src/data/archive.mjs). Astro renders it into the
    page and embeds the same data as JSON, read here for the reel, the lightbox and "Show more photos". */
 const ARCHIVE = (() => {
   try {

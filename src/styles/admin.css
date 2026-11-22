@@ -25,7 +25,7 @@
   --warn: #e3c07a;
   --bad: #ef9a8f;
   --info: #a9bfd8;
-  --sans: "Inter Tight Variable", system-ui, sans-serif;
+  --sans: "Montserrat Variable", Montserrat, system-ui, sans-serif;
   --serif: "Libre Bodoni Variable", Didot, "Bodoni 72", Georgia, serif;
   --mono: "Geist Mono Variable", ui-monospace, monospace;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -1696,6 +1696,7 @@ body.locked > :not(.gate, script, style) {
   overflow: auto;
 }
 .cm-file {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
@@ -1995,6 +1996,69 @@ button.cm-file:hover {
   font-size: 14px;
 }
 
+.cm-file .thw {
+  position: relative;
+}
+.cm-del {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11.5px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  background: rgb(0 0 0 / 60%);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.cm-file:hover .cm-del,
+.cm-del:focus-visible {
+  opacity: 1;
+}
+.cm-kind {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  position: relative;
+  z-index: 1;
+}
+.cm-kind select {
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: 9px;
+  padding: 6px 8px;
+  font-size: 13.5px;
+}
+.cm-drop .cm-kind {
+  justify-self: center;
+  margin-top: 4px;
+}
+.cm-row .th img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.cm-row .hint {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cm-row .flags select {
+  width: auto;
+  padding: 5px 8px;
+  font-size: 12.5px;
+}
+#v-content code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-3);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {
   .inbox,
@@ -2071,3 +2135,7 @@ button.cm-file:hover {
     animation: none !important;
   }
 }
+
+#main:focus {
+  outline: none;
+} /* focused by the board for screen readers; no visible ring needed on the whole page */

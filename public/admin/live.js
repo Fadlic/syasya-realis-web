@@ -328,6 +328,9 @@
     gate.remove();
     document.body.classList.remove("locked");
     S.show(location.hash.slice(1) || "dash");
+    /* the Content panel (content.js) uses the same signed-in client */
+    window.__adminDB = { sb, me, url: C.supabaseUrl };
+    document.dispatchEvent(new Event("studio-live-ready"));
   }
 
   /* ---------- load everything ---------- */

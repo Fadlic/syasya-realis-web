@@ -2,7 +2,7 @@
    Full-screen opening: random clips from WORK play a few seconds each like a trailer, under film grain,
    a soft blur and a running film-strip border. Moving the cursor to the centre focuses the picture and
    reveals the logo + "Go to site"; on touch screens it appears by itself. Shown once per visit. */
-const INTRO = { enabled: true, clipSeconds: 3.2, oncePerVisit: true };
+const INTRO = Object.assign({ enabled: true, clipSeconds: 3.2, oncePerVisit: true }, SITE_DATA.intro); // set in the admin Content panel
 (() => {
   const box0 = document.getElementById("intro");
   if (!box0) return;

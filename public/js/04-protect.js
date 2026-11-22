@@ -1,7 +1,7 @@
 /* ===== Media protection — level 1 =====
    Stops casual saving only (right-click, drag, long-press, the video Download menu, Picture-in-Picture).
    It cannot stop screen recording or someone reading the page source — use watermarked, web-size files for that. */
-const PROTECT = { enabled: true, watermark: true };
+const PROTECT = Object.assign({ enabled: true, watermark: true }, SITE_DATA.protect); // set in the admin Content panel
 (() => {
   if (!PROTECT.enabled) return;
   const b = document.body;

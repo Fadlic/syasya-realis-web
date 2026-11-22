@@ -1,12 +1,14 @@
 ---
 import Base from "../layouts/Base.astro";
+import { getContent, pageText, heading, para } from "../lib/content.mjs";
+const A = pageText(await getContent(), "en").about;
 ---
 <Base title="About — Syasya&Realis" page="about" description="Meet Syasya Ahmad and the studio behind Syasya&Realis: a multidisciplinary practice working between what is seen and what is felt.">
 <main id="about-us">
   <section class="ab-hero">
     <div class="eyebrow mono"><span>(About) <span data-name>Syasya&Realis</span></span><span>The studio</span></div>
-    <h1 class="rv">Between what is seen and what is <span class="serif">felt.</span></h1>
-    <p class="lead rv">Founded by Syasya Ahmad, <span data-name>Syasya&Realis</span> is an independent multidisciplinary creative studio exploring the intersection of <em class="hl">photography, film, montage, and graphic design.</em></p>
+    <h1 class="rv" set:html={heading(A.headline)} />
+    <p class="lead rv" set:html={para(A.lead)} />
     <figure class="ab-mark rv" aria-label="Syasya&Realis monogram"><i class="srm light" aria-hidden="true"></i><figcaption class="lockup">Syasya&Realis<span>Creative Studio</span></figcaption></figure>
   </section>
 
@@ -14,8 +16,8 @@ import Base from "../layouts/Base.astro";
     <div class="eyebrow mono"><span>(01) The founder</span><span>Syasya Ahmad</span></div>
     <div class="profile">
       <div class="rv">
-        <p>Our work spans fashion campaigns, short films, education promos and brand content — including projects for J Luxe and Unisel.</p>
-        <p>Guided by an instinct for composition, atmosphere, and narrative, Syasya transforms everyday realities into <em class="hl">considered visual expressions</em> that balance authenticity with artistic intention.</p>
+        <p set:html={para(A.p1)} />
+        <p set:html={para(A.p2)} />
       </div>
       <dl class="facts-list rv" id="ab-facts"></dl>
     </div>

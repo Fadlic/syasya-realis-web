@@ -17,6 +17,9 @@ import Progress from "../components/Progress.astro";
 import Intro from "../components/Intro.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { getContent, siteData, jsonForScript } from "../lib/content.mjs";
+/* contact, intro, protection, About facts, testimonials for the browser scripts (from the admin Content panel) */
+const siteJson = jsonForScript(siteData(await getContent(), "en"));
 const DEFAULT_DESC = "Syasya&Realis is an independent creative studio by Syasya Ahmad: photography, videography, montage and graphic design for brands, fashion and film.";
 const { title, page, intro = false, description = DEFAULT_DESC, noindex = false } = Astro.props;
 /* absolute URLs need the live domain: set SITE_URL (e.g. https://syasyarealis.com) when building for hosting */
@@ -36,6 +39,7 @@ const ld = page === "index" ? {
     <link rel="icon" type="image/png" href="/brand/favicon.png">
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
     <meta name="description" content={description}>
+    <!-- website design and code: John's Tech & Co · photos, videos and designs: Syasya&Realis -->
     {noindex && <meta name="robots" content="noindex">}
     {canonical && <link rel="canonical" href={canonical}>}
     <meta property="og:site_name" content="Syasya&amp;Realis">
@@ -55,6 +59,7 @@ const ld = page === "index" ? {
     <title>{title}</title>
   </head>
   <body class="v2 duo ref sr" data-page={page}>
+    <script type="application/json" id="site-data" is:inline set:html={siteJson}></script>
     <Progress />
     {intro && <Intro />}
     <Header />

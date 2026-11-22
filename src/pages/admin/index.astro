@@ -4,17 +4,22 @@
    Scripts are files (public/admin/*.js) so the page passes the Content-Security-Policy;
    the Supabase client comes from our own bundle (src/scripts/supabase-loader.ts), never a CDN.
    Without a Supabase URL + key in /js/config.js the board opens in demo mode with sample data. */
-import "@fontsource-variable/inter-tight";
+import "@fontsource-variable/montserrat";   /* same face as the website (audit M5) */
 import "@fontsource-variable/libre-bodoni";
 import "@fontsource-variable/libre-bodoni/wght-italic.css";
 import "@fontsource-variable/geist-mono";
 import "../../styles/admin.css";
+import { DEFAULTS, PAGE_FIELDS, LANGS } from "../../data/content.mjs";
+import { jsonForScript } from "../../lib/content.mjs";
+/* built-in website content: what the Content panel starts from while nothing is saved */
+const contentJson = jsonForScript({ defaults: DEFAULTS, fields: PAGE_FIELDS, langs: LANGS });
 ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
+<!-- website and admin: John's Tech & Co -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Syasya&amp;Realis — Admin</title>
 <link rel="icon" type="image/png" href="/brand/favicon.png">
@@ -98,51 +103,55 @@ import "../../styles/admin.css";
 
       <!-- ========== CONTENT ========== -->
       <section class="view" id="v-content" aria-labelledby="h-content" hidden>
+        <script type="application/json" id="content-defaults" is:inline set:html={contentJson}></script>
         <div class="head"><div><span class="mono muted">Content</span><h1 id="h-content">Edit the website, <span class="serif">publish when ready.</span></h1></div>
-          <div class="cm-actions"><span class="cm-state" id="cmState"><i></i><span>All changes published</span></span>
-            <button class="btn sm" type="button" id="cmPreview">Preview site ↗</button>
+          <div class="cm-actions"><span class="cm-state" id="cmState"><i></i><span>Loading…</span></span>
             <button class="btn sm fill" type="button" id="cmPublish" disabled>Publish</button></div></div>
-        <p class="note" role="note"><b>Preview only.</b> Content editing is not connected to the database yet: what you see here is sample data, and nothing is uploaded, saved or published. The website still uses the text and media in the code.</p>
+        <p class="note" role="note" id="cmNote"><b>Demo.</b> Sample data: changes stay in this page only. Signed in, everything here is saved to the database as a draft.</p>
 
         <div class="cm-tabs" role="tablist" aria-label="Content sections">
           <button role="tab" aria-selected="true" data-t="media">Media library</button>
           <button role="tab" aria-selected="false" data-t="archive">Archive</button>
           <button role="tab" aria-selected="false" data-t="pages">Page text</button>
           <button role="tab" aria-selected="false" data-t="site">Site settings</button>
-          <button role="tab" aria-selected="false" data-t="guide">Guidelines</button>
           <button role="tab" aria-selected="false" data-t="hist">History</button>
         </div>
 
         <!-- MEDIA -->
         <div class="cm-pane" data-p="media">
           <div class="cm-grid2">
-            <label class="cm-drop" id="cmDrop" tabindex="0">
-              <input type="file" id="cmFile" multiple accept="video/mp4,video/webm,image/jpeg,image/png,image/webp">
+            <div class="cm-drop" id="cmDrop">
+              <input type="file" id="cmFile" multiple accept="video/mp4,video/webm,image/jpeg,image/png,image/webp" aria-label="Choose files to upload">
               <b>Drop videos, photos or designs here</b><span class="hint">or click to choose · MP4, WebM, JPG, PNG or WebP · up to 50 MB per file</span>
-              <span class="hint">Files are used as they are: export photos at web size first. Automatic resizing is not built yet.</span>
-            </label>
-            <div class="card cm-store"><div class="card-h"><h2>Storage</h2><span class="hint">Supabase Storage · example figures</span></div>
-              <div class="cm-meter"><i id="cmMeter" style="width:42%"></i></div>
-              <p class="hint"><b id="cmUsed">0.42 GB</b> of 1 GB used · <span id="cmCount">0</span> files</p>
-              <p class="hint">Large videos can also be linked from YouTube/Vimeo instead of uploaded.</p></div>
+              <span class="hint">Files are used as they are: export photos and videos for the web first.</span>
+              <label class="cm-kind">Images are uploaded as
+                <select id="cmKind"><option value="photo">Photos</option><option value="design">Designs</option><option value="poster">Video posters</option></select></label>
+            </div>
+            <div class="card cm-store"><div class="card-h"><h2>Storage</h2><span class="hint">Supabase Storage · Free plan</span></div>
+              <div class="cm-meter"><i id="cmMeter" style="width:0"></i></div>
+              <p class="hint"><b id="cmUsed">0 MB</b> of 1 GB used · <span id="cmCount">0</span> uploaded files</p>
+              <p class="hint">Videos above 50 MB: export a lighter MP4 (H.264) for the web.</p></div>
           </div>
-          <div class="cm-bar"><div class="seg" id="cmFilter"><button aria-pressed="true" data-f="all">All</button><button aria-pressed="false" data-f="video">Videos</button><button aria-pressed="false" data-f="photo">Photos</button><button aria-pressed="false" data-f="design">Designs</button></div>
+          <div class="cm-bar"><div class="seg" id="cmFilter"><button aria-pressed="true" data-f="all">All</button><button aria-pressed="false" data-f="video">Videos</button><button aria-pressed="false" data-f="photo">Photos</button><button aria-pressed="false" data-f="design">Designs</button><button aria-pressed="false" data-f="poster">Posters</button></div>
             <input class="cm-search" id="cmSearch" type="search" placeholder="Search files…" aria-label="Search files"></div>
           <div class="cm-lib" id="cmLib"></div>
         </div>
 
         <!-- ARCHIVE -->
         <div class="cm-pane" data-p="archive" hidden>
-          <div class="cm-bar"><div class="seg" id="cmArch"><button aria-pressed="true" data-a="film">01 Film</button><button aria-pressed="false" data-a="stills">02 Stills</button><button aria-pressed="false" data-a="design">03 Design</button></div>
-            <span class="hint">Drag ⋮⋮ to reorder · the order here is the order on the website</span>
+          <div class="cm-bar"><div class="seg" id="cmArch"><button aria-pressed="true" data-a="film">01 Film</button><button aria-pressed="false" data-a="photos">02 Stills</button><button aria-pressed="false" data-a="design">03 Design</button></div>
+            <span class="hint">Drag ⋮⋮ or use ↑ to reorder · the order here is the order on the website</span>
             <button class="btn sm" type="button" id="cmAdd">+ Add from media library</button></div>
           <ol class="cm-list" id="cmList"></ol>
         </div>
 
         <!-- PAGE TEXT -->
         <div class="cm-pane" data-p="pages" hidden>
+          <div class="cm-bar"><label class="cm-kind">Language <select id="cmLang"></select></label>
+            <span class="hint" id="cmLangNote">English is the main language.</span></div>
+          <p class="hint" style="margin:-4px 0 12px">Write <code>_words_</code> to give them the accent style of that spot (italic serif in headings, highlighted in paragraphs). A new line in a heading becomes a line break.</p>
           <div class="cm-pages">
-            <nav class="cm-pnav" id="cmPnav" aria-label="Pages"></nav>
+            <nav class="cm-pnav" id="cmPnav" aria-label="Page sections"></nav>
             <form class="card cm-pform" id="cmPform" novalidate></form>
           </div>
         </div>
@@ -150,38 +159,30 @@ import "../../styles/admin.css";
         <!-- SITE SETTINGS -->
         <div class="cm-pane" data-p="site" hidden>
           <div class="cm-grid2">
-            <form class="card cm-form" data-group="contact" novalidate><div class="card-h"><h2>Contact</h2><span class="hint">Footer, contact form and buttons</span></div>
-              <div class="fld"><label for="cm-email">Email</label><input id="cm-email" data-k="email" value="hello@studio.com"></div>
-              <div class="fld"><label for="cm-ig">Instagram link</label><input id="cm-ig" data-k="instagram" placeholder="https://instagram.com/…"></div>
-              <div class="fld"><label for="cm-wa">WhatsApp number</label><input id="cm-wa" data-k="whatsapp" placeholder="62812…" inputmode="tel"><span class="hint">Country code, no + or spaces</span></div></form>
-            <form class="card cm-form" data-group="behaviour" novalidate><div class="card-h"><h2>Landing &amp; protection</h2></div>
-              <div class="setrow"><div><strong>Landing intro</strong><p>Random clips before the site opens</p></div><label class="sw"><span class="sr">Landing intro</span><input type="checkbox" data-k="intro" checked><i></i></label></div>
-              <div class="fld"><label for="cm-clip">Seconds per clip</label><input id="cm-clip" data-k="clip" type="number" min="2" max="8" step="0.1" value="3.2"></div>
-              <div class="setrow"><div><strong>Watermark on photos</strong><p>“© Syasya&amp;Realis” over stills</p></div><label class="sw"><span class="sr">Watermark</span><input type="checkbox" data-k="wm" checked><i></i></label></div>
-              <div class="setrow"><div><strong>Block right-click &amp; download</strong><p>Casual protection only</p></div><label class="sw"><span class="sr">Protection</span><input type="checkbox" data-k="protect" checked><i></i></label></div></form>
-          </div>
-        </div>
-
-        <!-- GUIDELINES -->
-        <div class="cm-pane" data-p="guide" hidden>
-          <div class="cm-grid2">
-            <form class="card cm-form" data-group="palette" novalidate><div class="card-h"><h2>Palette</h2><span class="hint">Shown on the Guidelines page</span></div>
-              <div class="cm-sw"><input type="color" value="#000000" data-k="c1" aria-label="Colour 1"><div class="fld"><label for="cm-c1n">Raven Black</label><input id="cm-c1n" data-k="c1n" value="Authority · confidence · contrast"></div></div>
-              <div class="cm-sw"><input type="color" value="#F8F5EF" data-k="c2" aria-label="Colour 2"><div class="fld"><label for="cm-c2n">Editorial Cream</label><input id="cm-c2n" data-k="c2n" value="Refinement · space · calm"></div></div>
-              <div class="cm-sw"><input type="color" value="#D0021B" data-k="c3" aria-label="Colour 3"><div class="fld"><label for="cm-c3n">Signature Red</label><input id="cm-c3n" data-k="c3n" value="Passion · detail · focus"></div></div></form>
-            <div class="card"><div class="card-h"><h2>Application mockups</h2><span class="hint">Click an image to replace it</span></div>
-              <div class="cm-mock" id="cmMock"></div></div>
+            <form class="card cm-form" id="cmSiteContact" novalidate><div class="card-h"><h2>Contact</h2><span class="hint">Footer, contact section and form buttons</span></div>
+              <div class="fld"><label for="cm-email">Email</label><input id="cm-email" type="email" data-k="contact.email"></div>
+              <div class="fld"><label for="cm-ig">Instagram link</label><input id="cm-ig" type="url" data-k="contact.instagram" placeholder="https://instagram.com/…"></div>
+              <div class="fld"><label for="cm-wa">WhatsApp number</label><input id="cm-wa" data-k="contact.whatsapp" placeholder="6281234567890" inputmode="tel"><span class="hint">Country code first, digits only. Turns on “Send via WhatsApp”.</span></div>
+              <h3 style="margin-top:6px">About page facts</h3><span class="hint" style="margin-top:-8px">Leave empty to hide the row</span>
+              <div class="row"><div class="fld"><label for="cm-based">Based in</label><input id="cm-based" data-k="about.based" maxlength="40"></div>
+                <div class="fld"><label for="cm-founded">Founded</label><input id="cm-founded" data-k="about.founded" maxlength="10"></div></div>
+              <div class="fld"><label for="cm-team">Team</label><input id="cm-team" data-k="about.team" maxlength="40"></div></form>
+            <form class="card cm-form" id="cmSiteBehaviour" novalidate><div class="card-h"><h2>Landing &amp; protection</h2></div>
+              <div class="setrow"><div><strong>Landing intro</strong><p>Random clips before the site opens</p></div><label class="sw"><span class="sr">Landing intro</span><input type="checkbox" data-k="intro.enabled"><i></i></label></div>
+              <div class="fld"><label for="cm-clip">Seconds per clip</label><input id="cm-clip" data-k="intro.clipSeconds" type="number" min="2" max="8" step="0.1"></div>
+              <div class="setrow"><div><strong>Block right-click &amp; download</strong><p>Casual protection only</p></div><label class="sw"><span class="sr">Protection</span><input type="checkbox" data-k="protect.enabled"><i></i></label></div>
+              <div class="setrow"><div><strong>Watermark on photos</strong><p>“© Syasya&amp;Realis” over stills (needs protection on)</p></div><label class="sw"><span class="sr">Watermark</span><input type="checkbox" data-k="protect.watermark"><i></i></label></div></form>
           </div>
         </div>
 
         <!-- HISTORY -->
         <div class="cm-pane" data-p="hist" hidden>
-          <div class="card"><div class="card-h"><h2>Published versions</h2><span class="hint">Restore puts an old version back as a draft</span></div>
+          <div class="card"><div class="card-h"><h2>Published versions</h2><span class="hint">Restore puts an old version back as the draft; publish again to make it live</span></div>
             <ol class="cm-hist" id="cmHist"></ol></div>
         </div>
 
-        <div class="cm-dock" id="cmDock" hidden><span><b id="cmN">0</b> unpublished changes</span>
-          <button class="btn sm" type="button" id="cmDiscard">Discard</button><button class="btn sm fill" type="button" id="cmPublish2">Publish to website</button></div>
+        <div class="cm-dock" id="cmDock" hidden><span id="cmDockText">Unpublished changes</span>
+          <button class="btn sm" type="button" id="cmDiscard">Discard draft</button><button class="btn sm fill" type="button" id="cmPublish2">Publish to website</button></div>
         <div class="cm-modal" id="cmModal" hidden role="dialog" aria-modal="true" aria-labelledby="cmMt"><div class="card"><div class="card-h"><h2 id="cmMt">Pick from media library</h2><button class="btn sm" type="button" data-close>Close</button></div><div class="cm-lib sm" id="cmPick"></div></div></div>
       </section>
 
