@@ -5,7 +5,7 @@ document.addEventListener("click", e => {
   const a = e.target.closest("a.brand"); if (!a) return;
   e.preventDefault(); e.stopImmediatePropagation();
   if (document.body.dataset.page !== "index") {
-    try { sessionStorage.setItem("sr-intro-replay", "1"); } catch (err) {}
+    try { sessionStorage.setItem("sr-intro-replay", "1"); } catch { /* storage or clipboard blocked: nothing to do */ }
     location.href = "/"; return;
   }
   scrollTo({ top: 0 });

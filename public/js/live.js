@@ -13,9 +13,9 @@
   const enabled = !!(C.supabaseUrl && C.supabaseAnonKey);
   const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
   const form = $("#brief");
-  const session = { get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
-                    set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} },
-                    del: k => { try { sessionStorage.removeItem(k); } catch (e) {} } };
+  const session = { get: k => { try { return sessionStorage.getItem(k); } catch { return null; } },
+                    set: (k, v) => { try { sessionStorage.setItem(k, v); } catch { /* storage or clipboard blocked: nothing to do */ } },
+                    del: k => { try { sessionStorage.removeItem(k); } catch { /* storage or clipboard blocked: nothing to do */ } } };
 
   /* offer → contact form (shared by the pop-up button and the carried-over offer) */
   function applyOffer(o) {
@@ -32,7 +32,7 @@
   /* ---------- 1. save enquiries (home page) ---------- */
   if (form) {
     const carried = session.get("sr-offer");
-    if (carried) { session.del("sr-offer"); try { applyOffer(JSON.parse(carried)); } catch (e) {}
+    if (carried) { session.del("sr-offer"); try { applyOffer(JSON.parse(carried)); } catch { /* storage or clipboard blocked: nothing to do */ }
       setTimeout(() => form.name.focus({ preventScroll: true }), 900); }
   }
   const status = $("#saveStatus");
@@ -105,7 +105,7 @@
 
   /* ---------- 2. live pop-ups (every page) ---------- */
   if (!enabled || C.livePopups === false) return;
-  const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
+  const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage or clipboard blocked: nothing to do */ } } };
 
   // short notice about anonymous visit data (once)
   if (C.visitNotice !== false && !store.get("studio-visit-notice")) {
@@ -116,12 +116,20 @@
     n.append(t, b); document.body.appendChild(n);
   }
 
-  const lib = document.createElement("script");
-  lib.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-  lib.onload = start; document.head.appendChild(lib);
+  /* the Supabase client comes from our own bundle (src/scripts/supabase-loader.ts), never from a CDN */
+  const loader = () => window.__loadSupabase ? Promise.resolve(window.__loadSupabase)
+    : new Promise(r => document.addEventListener("supabase-loader-ready", () => r(window.__loadSupabase), { once: true }));
+  /* wait until the page has loaded and the browser is idle, so the client never competes with the first view */
+  const idle = () => new Promise(r => {
+    let done = false; const go = () => { if (done) return; done = true; EV.forEach(t => removeEventListener(t, go)); r(); };
+    const EV = ["scroll", "pointerdown", "keydown", "mousemove", "touchstart"];   // first sign of a real visitor…
+    EV.forEach(t => addEventListener(t, go, { once: true, passive: true }));
+    const later = () => setTimeout(go, 4000);                                      // …or 4 s after the page has loaded
+    document.readyState === "complete" ? later() : addEventListener("load", later, { once: true }); });
+  idle().then(loader).then(load => load()).then(m => start(m.createClient)).catch(() => {});
 
-  async function start() {
-    const sb = window.supabase.createClient(C.supabaseUrl, C.supabaseAnonKey, { auth: { persistSession: true, storageKey: "studio-visitor" } });
+  async function start(createClient) {
+    const sb = createClient(C.supabaseUrl, C.supabaseAnonKey, { auth: { persistSession: true, storageKey: "studio-visitor" } });
     let { data: { session: auth } } = await sb.auth.getSession();
     if (!auth) { const r = await sb.auth.signInAnonymously(); if (r.error) return; auth = r.data.session; }
     const uid = auth.user.id;
@@ -169,7 +177,7 @@
         if (e.key === "Tab") { const f = [...po.querySelectorAll("button")].filter(b => !b.hidden); if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f.at(-1).focus(); } else if (!e.shiftKey && document.activeElement === f.at(-1)) { e.preventDefault(); f[0].focus(); } } };
       const onBg = e => { if (e.target === po) close("Closed"); };
       const onX = () => close("Closed");
-      const onCode = async () => { try { await navigator.clipboard.writeText(c.code); $("#po-code span").textContent = "Copied ✓"; } catch (e) {} };
+      const onCode = async () => { try { await navigator.clipboard.writeText(c.code); $("#po-code span").textContent = "Copied ✓"; } catch { /* storage or clipboard blocked: nothing to do */ } };
       const onCta = () => {
         const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const rnd = Array.from(crypto.getRandomValues(new Uint8Array(4)), b => A[b % A.length]).join("");
         const offer = { booking: c.code ? `${c.code}-${rnd}` : "", id: c.id, value: c.value, applies_to: c.applies_to, service_hint: c.service_hint };

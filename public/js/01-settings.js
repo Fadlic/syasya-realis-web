@@ -75,6 +75,8 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
   /* placeholder helper: shows a tinted tile with the file name until the file exists */
   const ph = (label, i) => { const d = document.createElement("div"); d.className = "ph";
     d.dataset.label = label; d.style.setProperty("--g", tones[i % tones.length]); return d; };
+  /* builds an element whose text is set as text, never parsed as HTML (titles may come from the CMS later) */
+  const tx = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const img = (src, label, i, alt="") => { const im = new Image(); im.alt = alt; im.loading = "lazy"; im.decoding = "async";
     im.onerror = () => im.replaceWith(ph(label, i)); im.src = src; return im; };
   const vid = (src, poster, label, i, opts={}) => {
@@ -135,14 +137,18 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
     }
     shot.insertAdjacentHTML("beforeend", `<div class="cursor mono">Play</div>`);
     a.appendChild(shot);
-    a.insertAdjacentHTML("beforeend", `<div class="item-meta"><h3>${w.title}</h3><span class="mono"><span class="meta-view v2-only">View ↗&nbsp;&nbsp;</span>${w.cat}</span></div><div class="meta-tags v2-only">${w.tags.map(t=>`<span>${t}</span>`).join("")}</div>`);
+    const meta = tx("div", "item-meta"), cat = tx("span", "mono"), tags = tx("div", "meta-tags v2-only");
+    cat.append(tx("span", "meta-view v2-only", "View ↗\u00a0\u00a0"), w.cat);
+    meta.append(tx("h3", null, w.title), cat);
+    w.tags.forEach(t => tags.append(tx("span", null, t)));
+    a.append(meta, tags);
     /* hover preview: plays the first PREVIEW_SECONDS on a loop, resets when the cursor leaves */
     const startPreview = () => { const vv = a.querySelector("video"); if (!vv) return;
       vv.loop = false; vv.muted = true;
       if (!vv._pv) { vv._pv = true; vv.addEventListener("timeupdate", () => { if (vv.currentTime >= PREVIEW_SECONDS) vv.currentTime = 0; });
         vv.addEventListener("ended", () => { if (a.matches(":hover")) { vv.currentTime = 0; vv.play().catch(()=>{}); } }); }
       vv.preload = "auto"; vv.play().catch(()=>{}); };
-    const stopPreview = () => { const vv = a.querySelector("video"); if (!vv) return; vv.pause(); try { vv.currentTime = 0; } catch (e) {} };
+    const stopPreview = () => { const vv = a.querySelector("video"); if (!vv) return; vv.pause(); try { vv.currentTime = 0; } catch { /* storage or clipboard blocked: nothing to do */ } };
     a.addEventListener("mouseenter", startPreview);
     a.addEventListener("mouseleave", stopPreview);
     a.addEventListener("focus", startPreview); a.addEventListener("blur", stopPreview);
@@ -182,7 +188,8 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
     const shot = document.createElement("div"); shot.className = "shot"; if (d.ar) shot.style.setProperty("--ar", d.ar);
     shot.appendChild(img(d.src, d.src.split("/").pop(), i+3, d.title));
     a.appendChild(shot);
-    a.insertAdjacentHTML("beforeend", `<div class="item-meta"><h3 style="font-size:17px">${d.title}</h3><span class="mono">${d.cat}</span></div>`);
+    const meta = tx("div", "item-meta"), h = tx("h3", null, d.title); h.style.fontSize = "17px";
+    meta.append(h, tx("span", "mono", d.cat)); a.append(meta);
     const open = () => openLB("design", i); a.onclick = open; a.onkeydown = e => { if (e.key === "Enter") open(); };
     $("#designGrid").appendChild(a);
   });
@@ -225,9 +232,16 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
     if (strip && !strip.hidden) { [...strip.children].forEach((t, i) => t.classList.toggle("on", i === idx));
       const t = strip.children[idx]; if (t) strip.scrollTo({ left: t.offsetLeft - (strip.clientWidth - t.offsetWidth) / 2, behavior: "smooth" }); }   // scroll the strip only, never the page
   };
-  const openLB = window.__openLB = (m, i=0) => { mode = m; idx = i; lb.classList.add("open"); document.body.style.overflow = "hidden";
-    buildStrip(m === "video" ? WORK : m === "design" ? DESIGN : m === "photo" ? PHOTOS : []); render(); };
-  const closeLB = () => { lb.classList.remove("open"); stage.innerHTML = ""; document.body.style.overflow = ""; };
+  /* while open: focus moves into the viewer, Tab stays inside it, the page behind is inert; focus returns on close */
+  let lastFocus = null;
+  const behind = () => [...document.body.children].filter(x => x !== lb && x.tagName !== "SCRIPT");
+  const openLB = window.__openLB = (m, i=0) => { mode = m; idx = i; lastFocus = document.activeElement;
+    lb.classList.add("open"); document.body.style.overflow = "hidden"; behind().forEach(x => x.inert = true);
+    buildStrip(m === "video" ? WORK : m === "design" ? DESIGN : m === "photo" ? PHOTOS : []); render();
+    setTimeout(() => $("#lbClose").focus({ preventScroll: true }), 30); };
+  const closeLB = () => { lb.classList.remove("open"); stage.innerHTML = ""; document.body.style.overflow = "";
+    behind().forEach(x => x.inert = false); $("#sheet").inert = !document.body.classList.contains("menu");
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true }); };
   $("#lbClose").onclick = closeLB;
   lb.addEventListener("click", e => { if (e.target === lb || e.target === stage) closeLB(); });
   addEventListener("keydown", e => { if (!lb.classList.contains("open")) return;
@@ -238,13 +252,17 @@ const PHOTOS = Array.from({length:27}, (_,i) => ({
 
   /* nav */
   addEventListener("scroll", () => $("#nav").classList.toggle("solid", scrollY > 40), {passive:true});
-  const menu = o => document.body.classList.toggle("menu", o);
-  $("#burger").onclick = () => menu(!document.body.classList.contains("menu"));
+  /* mobile menu: while closed it is inert, so Tab and screen readers skip its links */
+  const sheet = $("#sheet"), burger = $("#burger");
+  const menu = o => { document.body.classList.toggle("menu", o); sheet.inert = !o; burger.setAttribute("aria-expanded", String(o)); };
+  window.__menu = menu; menu(false);
+  burger.onclick = () => menu(!document.body.classList.contains("menu"));
+  addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("menu")) { menu(false); burger.focus(); } });
   $$("#sheet a").forEach(a => a.onclick = () => { menu(false); });   // braces: returning false would cancel the link
 
   /* copy helpers */
   const copy = async (text, hintEl, okText, resetText) => {
-    let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch (e) {}
+    let ok = false; try { await navigator.clipboard.writeText(text); ok = true; } catch { /* storage or clipboard blocked: nothing to do */ }
     hintEl.textContent = ok ? okText : "Select to copy"; setTimeout(() => hintEl.textContent = resetText, 2000); };
   if (HOME) {
   $("#copyMail").onclick = () => copy(SITE.email, $("#copyHint"), "Copied ✓", "Copy");

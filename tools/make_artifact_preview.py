@@ -28,14 +28,15 @@ def fix_links(html):
     html = html.replace("<head>", "<head>" + SHIM, 1)
     return html
 
+PAGES["404"] = "404.html"
 for name, src in PAGES.items():
     html = open(os.path.join(DIST, src), encoding="utf-8").read()
-    open(os.path.join(OUT, "index.html" if name == "index" else name + ".html"), "w", encoding="utf-8").write(fix_links(html))
+    open(os.path.join(OUT, "index.html" if name == "index" else ("404.html" if name == "404" else name + ".html")), "w", encoding="utf-8").write(fix_links(html))
 
 for f in os.listdir(os.path.join(OUT, "assets")):
     if f.endswith(".css"):
         p = os.path.join(OUT, "assets", f)
-        s = open(p, encoding="utf-8").read().replace("url(/brand/", "url(../brand/")
+        s = open(p, encoding="utf-8").read().replace("url(/brand/", "url(../brand/").replace("url(/_astro/", "url(./")
         open(p, "w", encoding="utf-8").write(s)
 
 p = os.path.join(OUT, "js", "03-pages.js"); s = open(p).read()

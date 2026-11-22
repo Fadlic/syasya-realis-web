@@ -14,6 +14,6 @@
   if (items[0]) pick(items[0].dataset.k);
   // palette: copy hex
   document.querySelectorAll(".ci-pal button").forEach(b => b.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(b.dataset.hex); } catch (e) {}
+    try { await navigator.clipboard.writeText(b.dataset.hex); } catch { /* storage or clipboard blocked: nothing to do */ }
     b.classList.add("copied"); setTimeout(() => b.classList.remove("copied"), 1400); }));
 })();

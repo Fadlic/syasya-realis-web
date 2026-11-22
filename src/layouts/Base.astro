@@ -1,12 +1,32 @@
 ---
 /* Kerangka semua halaman: <head>, header, footer, lightbox, pop-up, skrip.
    Dipecah dari V4.4 (satu file + router hash) oleh tools/split_astro.py. */
+/* fonts are self-hosted (no request to Google; only the subsets a page uses are downloaded) */
+import "@fontsource-variable/montserrat";
+import "@fontsource-variable/montserrat/wght-italic.css";
+import "@fontsource-variable/bodoni-moda/opsz.css";
+import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+import "@fontsource-variable/libre-bodoni";
+import "@fontsource-variable/libre-bodoni/wght-italic.css";
+import "@fontsource-variable/geist-mono";
 import "../styles/site.css";
+/* the two faces seen first (headline + body text) are preloaded so text does not wait for the CSS */
+import displayFont from "@fontsource-variable/libre-bodoni/files/libre-bodoni-latin-wght-normal.woff2?url";
+import bodyFont from "@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url";
 import Progress from "../components/Progress.astro";
 import Intro from "../components/Intro.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-const { title, page, intro = false } = Astro.props;
+const DEFAULT_DESC = "Syasya&Realis is an independent creative studio by Syasya Ahmad: photography, videography, montage and graphic design for brands, fashion and film.";
+const { title, page, intro = false, description = DEFAULT_DESC, noindex = false } = Astro.props;
+/* absolute URLs need the live domain: set SITE_URL (e.g. https://syasyarealis.com) when building for hosting */
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : null;
+const ogImage = Astro.site ? new URL("/brand/og-image.jpg", Astro.site).href : "/brand/og-image.jpg";
+const ld = page === "index" ? {
+  "@context": "https://schema.org", "@type": "ProfessionalService", name: "Syasya&Realis", description: DEFAULT_DESC,
+  founder: { "@type": "Person", name: "Syasya Ahmad" }, image: ogImage, logo: Astro.site ? new URL("/brand/apple-touch-icon.png", Astro.site).href : undefined,
+  url: Astro.site ? Astro.site.href : undefined, knowsAbout: ["Photography", "Videography", "Montage design", "Graphic design"]
+} : null;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -15,14 +35,23 @@ const { title, page, intro = false } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="/brand/favicon.png">
     <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
-    <meta property="og:title" content="Syasya&amp;Realis — Visual Narratives &amp; Moving Art">
-    <meta property="og:description" content="A visual practice in reality, rhythm, and refined expression. An independent creative practice devoted to imagery that lingers.">
+    <meta name="description" content={description}>
+    {noindex && <meta name="robots" content="noindex">}
+    {canonical && <link rel="canonical" href={canonical}>}
+    <meta property="og:site_name" content="Syasya&amp;Realis">
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
     <meta property="og:type" content="website">
+    {canonical && <meta property="og:url" content={canonical}>}
+    <meta property="og:image" content={ogImage}>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Syasya&amp;Realis — Visual Narratives &amp; Moving Art">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#0A0807">
-    <meta name="description" content="Syasya&amp;Realis — an independent multidisciplinary creative studio by Syasya Ahmad: photography, videography, montage and graphic design.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400..700;1,400..600&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Libre+Bodoni:ital,wght@0,400..700;1,400..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+    {ld && <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />}
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin>
     <title>{title}</title>
   </head>
   <body class="v2 duo ref sr" data-page={page}>
@@ -31,16 +60,17 @@ const { title, page, intro = false } = Astro.props;
     <Header />
     <slot />
     <Footer />
-    <script is:inline src="/js/01-settings.js"></script>
-    <script is:inline src="/js/02-site.js"></script>
-    <script is:inline src="/js/03-pages.js"></script>
-    <script is:inline src="/js/04-protect.js"></script>
-    <script is:inline src="/js/05-intro.js"></script>
-    <script is:inline src="/js/config.js"></script>
-    <script is:inline src="/js/live.js"></script>
-    <script is:inline src="/js/06-interactive.js"></script>
-    <script is:inline src="/js/07-identity.js"></script>
-    <script is:inline src="/js/08-logo.js"></script>
-    <script is:inline src="/js/09-reveal.js"></script>
+    <script is:inline defer src="/js/01-settings.js"></script>
+    <script is:inline defer src="/js/02-site.js"></script>
+    <script is:inline defer src="/js/03-pages.js"></script>
+    <script is:inline defer src="/js/04-protect.js"></script>
+    <script is:inline defer src="/js/05-intro.js"></script>
+    <script>import "../scripts/supabase-loader.ts";</script>
+    <script is:inline defer src="/js/config.js"></script>
+    <script is:inline defer src="/js/live.js"></script>
+    <script is:inline defer src="/js/06-interactive.js"></script>
+    <script is:inline defer src="/js/07-identity.js"></script>
+    <script is:inline defer src="/js/08-logo.js"></script>
+    <script is:inline defer src="/js/09-reveal.js"></script>
   </body>
 </html>

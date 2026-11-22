@@ -33,14 +33,14 @@
 
   /* active menu item + title (follows SITE.name like before) */
   $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === PAGE));
-  const TITLES = { about: "About", guidelines: "Brand guidelines", faq: "FAQ" };
+  const TITLES = { about: "About", guidelines: "Brand guidelines", faq: "FAQ", "404": "Page not found" };
   document.title = TITLES[PAGE] ? `${TITLES[PAGE]} — ${SITE.name}` : `${SITE.name} — Visual Narratives & Moving Art`;
 
   /* sub-pages: show everything at once, as the old page switch did */
   if (PAGE !== "index") $$("main .rv").forEach(el => el.classList.add("in"));
 
   /* closing the mobile menu when a link to a section of the same page is used */
-  document.addEventListener("click", e => { if (e.target.closest(".sheet a")) document.body.classList.remove("menu"); });
+  document.addEventListener("click", e => { if (e.target.closest(".sheet a")) (window.__menu || (() => document.body.classList.remove("menu")))(false); });
 
   /* kept for older code that still calls it: navigate like a normal link */
   window.__go = target => {

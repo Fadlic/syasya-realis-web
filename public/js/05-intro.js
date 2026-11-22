@@ -8,7 +8,7 @@ const INTRO = { enabled: true, clipSeconds: 3.2, oncePerVisit: true };
   const TPL = box0.outerHTML, HOME = { parent: box0.parentNode, next: box0.nextSibling };
   const done = (() => { try {
     if (sessionStorage.getItem('sr-intro-replay') === '1') { sessionStorage.removeItem('sr-intro-replay'); return false; }   // logo clicked on another page
-    return INTRO.oncePerVisit && sessionStorage.getItem('sr-intro') === '1'; } catch (e) { return false; } })();
+    return INTRO.oncePerVisit && sessionStorage.getItem('sr-intro') === '1'; } catch { return false; } })();
   // the logo opens the landing again (see brand click handler)
   window.__playIntro = () => { if (!INTRO.enabled || document.getElementById('intro')) return false;
     const t = document.createElement('div'); t.innerHTML = TPL; const nb = t.firstElementChild; HOME.parent.insertBefore(nb, HOME.next && HOME.next.parentNode ? HOME.next : HOME.parent.firstChild); run(nb); return true; };
@@ -49,7 +49,7 @@ const INTRO = { enabled: true, clipSeconds: 3.2, oncePerVisit: true };
   if (touch || reduce) setTimeout(() => focus(true), 1500);
   else box.addEventListener('mousemove', e => { const dx = e.clientX - innerWidth / 2, dy = e.clientY - innerHeight / 2;
     focus(Math.hypot(dx / innerWidth, dy / innerHeight) < .2 || e.target.closest('.go')); });
-  const enter = () => { if (box.classList.contains('out')) return; try { sessionStorage.setItem('sr-intro', '1'); } catch (e) {}
+  const enter = () => { if (box.classList.contains('out')) return; try { sessionStorage.setItem('sr-intro', '1'); } catch { /* storage or clipboard blocked: nothing to do */ }
     box.classList.add('out'); document.body.classList.remove('intro-on'); clearInterval(timer); clearInterval(tick);
     setTimeout(() => { box.querySelectorAll('video').forEach(v => v.pause()); box.remove(); document.querySelector('.hero video')?.play?.().catch(() => {}); }, 1000);
     document.getElementById('top')?.focus?.(); };

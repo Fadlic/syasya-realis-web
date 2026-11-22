@@ -1,9 +1,12 @@
 /* ===================== INTERACTIVE (viewfinder · projector reel · graded manifesto) ===================== */
 (() => {
-  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const $ = s => document.querySelector(s);
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   const rnd = s => () => (s = (s * 16807) % 2147483647) / 2147483647;
+  /* run an animation only while its element is on (or near) the screen */
+  const whileVisible = (el, cb, margin = '200px') => { if (!('IntersectionObserver' in window)) return cb(true);
+    new IntersectionObserver(([e]) => cb(e.isIntersecting), { rootMargin: margin }).observe(el); };
 
   /* ---------- A. viewfinder cursor ---------- */
   if (fine) {
@@ -40,7 +43,7 @@
     track.appendChild(f); return f; });
   let cur = -1;
   const size = () => { const fw = Math.min(innerWidth < 700 ? innerWidth * .84 : innerWidth * .58, 980); frames.forEach(f => f.style.setProperty('--fw', fw + 'px')); return fw; };
-  let fw = size(); addEventListener('resize', () => { fw = size(); onScroll(); });
+  size(); addEventListener('resize', () => { size(); onScroll(); });
   const onScroll = () => { const r = proj.getBoundingClientRect(), total = proj.offsetHeight - innerHeight, p = Math.min(1, Math.max(0, -r.top / total));
     const pos = p * (n - 1); const a = Math.floor(pos), fr0 = Math.min(1, Math.max(0, (pos - a - .3) / .4)), ez = fr0 * fr0 * (3 - 2 * fr0), b = Math.min(n - 1, a + 1), c = x => frames[x].offsetLeft + frames[x].offsetWidth / 2, ctr = c(a) + (c(b) - c(a)) * ez; track.style.transform = `translateX(${innerWidth / 2 - ctr}px)`; $('#projBar').style.width = (p * 100) + '%';
     const i = Math.round(pos), _ = 0; if (i !== cur) { cur = i;
@@ -51,10 +54,13 @@
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
   // dust in the beam
   const cv = $('#dust'), cx2 = cv.getContext('2d'); let motes = [];
-  const fit = () => { cv.width = cv.offsetWidth; cv.height = cv.offsetHeight; motes = Array.from({ length: 70 }, () => ({ x: Math.random() * cv.width, y: Math.random() * cv.height, r: Math.random() * 1.6 + .3, v: Math.random() * .25 + .05, a: Math.random() * .6 + .2 })); };
+  const fit = () => { cv.width = cv.offsetWidth; cv.height = cv.offsetHeight; motes = Array.from({ length: innerWidth < 700 ? 35 : 70 }, () => ({ x: Math.random() * cv.width, y: Math.random() * cv.height, r: Math.random() * 1.6 + .3, v: Math.random() * .25 + .05, a: Math.random() * .6 + .2 })); };
   fit(); addEventListener('resize', fit);
-  (function dust() { if (!reduce) { cx2.clearRect(0, 0, cv.width, cv.height); motes.forEach(m => { m.y -= m.v; m.x += Math.sin((m.y + m.r * 50) / 40) * .2; if (m.y < -5) m.y = cv.height + 5;
-      cx2.globalAlpha = m.a; cx2.fillStyle = '#EEF6FB'; cx2.beginPath(); cx2.arc(m.x, m.y, m.r, 0, 7); cx2.fill(); }); } requestAnimationFrame(dust); })();
+  let dustOn = false, dustRunning = false;
+  const dust = () => { if (!dustOn || reduce) { dustRunning = false; return; }
+    cx2.clearRect(0, 0, cv.width, cv.height); motes.forEach(m => { m.y -= m.v; m.x += Math.sin((m.y + m.r * 50) / 40) * .2; if (m.y < -5) m.y = cv.height + 5;
+      cx2.globalAlpha = m.a; cx2.fillStyle = '#EEF6FB'; cx2.beginPath(); cx2.arc(m.x, m.y, m.r, 0, 7); cx2.fill(); }); requestAnimationFrame(dust); };
+  whileVisible(cv, v => { dustOn = v; if (v && !dustRunning) { dustRunning = true; requestAnimationFrame(dust); } });
 
   } /* end projector reel */
 
@@ -69,12 +75,18 @@
     const layers = graded ? ['#1B3442', '#16252E', '#3A0509', '#0A0807'] : ['#6e7173', '#5d6062', '#4c4e4f', '#3a3b3b'];
     layers.forEach((col, k) => { x.fillStyle = col; x.beginPath(); x.moveTo(0, h); const base = h * (.6 + k * .1); for (let px = 0; px <= w; px += w / 40) x.lineTo(px, base - Math.sin(px / w * (3 + k) + k) * h * (.08 - k * .012) - r() * h * .02); x.lineTo(w, h); x.fill(); });
     x.globalAlpha = graded ? .07 : .12; for (let i = 0; i < 6000; i++) { x.fillStyle = r() > .5 ? '#fff' : '#000'; x.fillRect(r() * w, r() * h, devicePixelRatio, devicePixelRatio); } x.globalAlpha = 1; };
-  const paintGrade = () => { scene(raw, false); scene(fin, true); }; paintGrade(); addEventListener('resize', paintGrade); if (window.ResizeObserver) new ResizeObserver(paintGrade).observe(grade);
+  /* paint only when the section is near the screen, and at most once per size */
+  let painted = '', near = false;
+  const paintGrade = () => { if (!near) return; const key = grade.offsetWidth + 'x' + grade.offsetHeight; if (key === painted) return; painted = key; scene(raw, false); scene(fin, true); };
+  let paintT; const paintSoon = () => { cancelAnimationFrame(paintT); paintT = requestAnimationFrame(paintGrade); };
+  addEventListener('resize', paintSoon); if (window.ResizeObserver) new ResizeObserver(paintSoon).observe(grade);
   let gx = 50, gt = 50, auto = true;
   const setX = v => { gx = v; grade.style.setProperty('--x', v + '%'); };
   grade.addEventListener('pointermove', e => { auto = false; const r = grade.getBoundingClientRect(); gt = Math.max(4, Math.min(96, (e.clientX - r.left) / r.width * 100)); });
   grade.addEventListener('pointerleave', () => { auto = true; });
-  (function g() { if (auto && !reduce) gt = 50 + Math.sin(performance.now() / 1800) * 18; setX(gx + (gt - gx) * .12); requestAnimationFrame(g); })();
+  let gRunning = false;
+  const g = () => { if (!near) { gRunning = false; return; } if (auto && !reduce) gt = 50 + Math.sin(performance.now() / 1800) * 18; setX(gx + (gt - gx) * .12); requestAnimationFrame(g); };
+  whileVisible(grade, v => { near = v; if (v) { paintSoon(); if (!gRunning) { gRunning = true; requestAnimationFrame(g); } } }, '800px');   // paint well before it scrolls in
 
   } /* end manifesto */
 })();
