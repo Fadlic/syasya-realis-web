@@ -2418,7 +2418,7 @@ body.po-open {
 /* ===== live backend bits ===== */
 .hp {
   position: absolute !important;
-  left: -9999px !important;
+  inset-inline-start: -9999px !important; /* off-screen on the side that never scrolls (also right-to-left) */
   width: 1px;
   height: 1px;
   overflow: hidden;
@@ -5108,5 +5108,130 @@ body.ref .app .ph-wrap {
   #gallery .ph-item > img,
   #designGrid .shot > img {
     transition: filter 0.2s linear;
+  }
+}
+
+/* =====================================================================
+   Languages — switcher (English · Bahasa Indonesia · Bahasa Melayu)
+   ===================================================================== */
+.lang {
+  position: relative;
+}
+.lang summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ink-2);
+  padding: 6px 2px;
+  transition: color 0.3s;
+}
+.lang summary::-webkit-details-marker {
+  display: none;
+}
+.lang summary svg {
+  width: 15px;
+  height: 15px;
+}
+.lang summary:hover,
+.lang[open] summary {
+  color: var(--ink);
+}
+.lang-list {
+  position: absolute;
+  top: calc(100% + 12px);
+  inset-inline-end: -10px;
+  min-width: 200px;
+  list-style: none;
+  background: rgba(20, 17, 16, 0.96);
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  padding: 6px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.lang-list a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 14px;
+  color: var(--ink-2);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.lang-list a:hover,
+.lang-list a:focus-visible {
+  background: var(--bg-3);
+  color: var(--ink);
+}
+.lang-list a[aria-current] {
+  color: var(--ink);
+}
+.lang-list a[aria-current]::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--rose);
+  transform: rotate(45deg);
+}
+.sheet-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.sheet-lang {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sheet-lang a {
+  font-size: 13px;
+  padding: 8px 13px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  color: var(--ink-2);
+}
+.sheet-lang a[aria-current] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+@media (max-width: 760px) {
+  .links .lang {
+    display: none;
+  }
+}
+/* guidelines in another language: the body stays English, with a short note */
+.lang-note {
+  margin: 0 var(--pad);
+  padding-top: 110px;
+  margin-bottom: -80px;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+/* tablets: the extra language button must not push "Start a project" off the bar */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .links {
+    gap: 18px;
+  }
+  .links .btn {
+    white-space: nowrap;
+  }
+}
+/* longer menu words: switch to the menu button earlier than in English */
+@media (max-width: 900px) {
+  :root:lang(ms) :is(.links a.l, .links .btn, .links .lang) {
+    display: none;
+  }
+  :root:lang(ms) .burger {
+    display: block;
   }
 }

@@ -9,6 +9,8 @@
    An offer accepted on another page is carried to /#contact (sessionStorage "sr-offer").
    ===================================================================== */
 (() => {
+  /* a service name in the page's language (the stored value stays English) */
+  const svcName = v => (LANG === "en" ? v.toLowerCase() : (I18N.services || {})[v] || v);
   const C = window.STUDIO_CONFIG || {};
   const enabled = !!(C.supabaseUrl && C.supabaseAnonKey);
   const $ = s => document.querySelector(s),
@@ -49,14 +51,17 @@
       ap.replaceChildren();
       const l = document.createElement("span");
       l.append(
-        `Offer applied: ${o.value || "offer"}${o.applies_to ? " on " + o.applies_to.toLowerCase() : ""} · booking code `
+        tr("offerApplied", "Offer applied: {value}{on} · booking code ", {
+          value: o.value || tr("offer", "offer"),
+          on: o.applies_to ? tr("offerOn", " on {what}", { what: svcName(o.applies_to) }) : "",
+        })
       );
       const b = document.createElement("b");
       b.textContent = o.booking;
       l.append(b);
       const rm = document.createElement("button");
       rm.type = "button";
-      rm.textContent = "Remove offer";
+      rm.textContent = tr("removeOffer", "Remove offer");
       rm.onclick = () => {
         $("#booking-code").value = "";
         $("#campaign-id").value = "";
@@ -107,11 +112,11 @@
     return body;
   };
   const MESSAGES = {
-    rate_limited: "You've sent a few enquiries already — please message us directly.",
-    invalid_email: "Please check the email address.",
-    invalid_name: "Please add your name.",
-    invalid_code: "That offer has ended — we'll still reply to your enquiry.",
-    rejected: "Could not send.",
+    rate_limited: tr("rateLimited", "You've sent a few enquiries already — please message us directly."),
+    invalid_email: tr("invalidEmail", "Please check the email address."),
+    invalid_name: tr("invalidName", "Please add your name."),
+    invalid_code: tr("invalidCode", "That offer has ended — we'll still reply to your enquiry."),
+    rejected: tr("rejected", "Could not send."),
   };
   const payload = () => ({
     p_name: form.name.value.trim(),
@@ -130,7 +135,7 @@
     const p = payload(),
       key = JSON.stringify(p);
     if (key === lastKey && lastRef) return lastRef; // no duplicate on double click
-    say("Saving your enquiry…");
+    say(tr("saving", "Saving your enquiry…"));
     try {
       let ref,
         ended = false;
@@ -146,13 +151,15 @@
       lastKey = key;
       lastRef = ref;
       say(
-        `Saved · your reference is ${ref}` + (ended ? " — the offer has ended, but we'll still reply." : ""),
+        ended
+          ? tr("savedEnded", "Saved · your reference is {ref} — the offer has ended, but we'll still reply.", { ref })
+          : tr("saved", "Saved · your reference is {ref}", { ref }),
         ended ? "warn" : "ok"
       );
       return ref;
     } catch (err) {
       const k = Object.keys(MESSAGES).find(k => err.message.includes(k));
-      say(k ? MESSAGES[k] : "Couldn't save a copy — your message will still open.", "warn");
+      say(k ? MESSAGES[k] : tr("notSaved", "Couldn't save a copy — your message will still open."), "warn");
       return null;
     }
   };
@@ -218,11 +225,13 @@
     n.className = "visit-notice";
     n.setAttribute("role", "status");
     const t = document.createElement("span");
-    t.textContent =
-      "We use anonymous visit data to show offers. No personal data is collected until you send the form.";
+    t.textContent = tr(
+      "visitNotice",
+      "We use anonymous visit data to show offers. No personal data is collected until you send the form."
+    );
     const b = document.createElement("button");
     b.type = "button";
-    b.textContent = "OK";
+    b.textContent = tr("ok", "OK");
     b.onclick = () => {
       store.set("studio-visit-notice", "1");
       n.remove();
@@ -311,7 +320,7 @@
       if (!force && page === lastPage) return;
       lastPage = page;
       sb.rpc("visitor_ping", {
-        p_page: page,
+        p_page: LANG === "en" ? page : `${page} · ${LANG.toUpperCase()}`,
         p_device: `${browser} · ${device}`,
         p_visit: returning ? "Returning" : "New",
       }).then(
@@ -360,24 +369,30 @@
       const po = $("#po");
       if (!po || po.classList.contains("show")) return;
       const until = c.valid_until
-        ? new Date(c.valid_until + "T00:00").toLocaleDateString("en-GB", {
+        ? new Date(c.valid_until + "T00:00").toLocaleDateString(LANG === "en" ? "en-GB" : LANG, {
             day: "numeric",
             month: "short",
             year: "numeric",
           })
         : "";
       $("#po-eye").textContent =
-        c.type === "News" ? "News from the studio" : c.type === "Discount" ? "Limited discount" : "Special offer";
+        c.type === "News"
+          ? tr("news", "News from the studio")
+          : c.type === "Discount"
+            ? tr("discount", "Limited discount")
+            : tr("special", "Special offer");
       $("#po-big").textContent = c.value || "";
       $("#po-big").hidden = !c.value;
       $("#po-h").textContent = c.headline;
       $("#po-m").textContent = c.message;
       $("#po-codev").textContent = c.code || "";
       $("#po-code").hidden = c.type === "News" || !c.code;
-      $("#po-cta").textContent = (c.cta || "Book a brief") + " ↗";
+      $("#po-cta").textContent = (c.cta || tr("bookBrief", "Book a brief")) + " ↗";
       $("#po-fine").textContent = [
-        c.applies_to && c.applies_to !== "All services" ? `For ${c.applies_to.toLowerCase()}` : "For all services",
-        until ? `valid until ${until}` : "",
+        c.applies_to && c.applies_to !== "All services"
+          ? tr("forWhat", "For {what}", { what: svcName(c.applies_to) })
+          : tr("forAll", "For all services"),
+        until ? tr("validUntil", "valid until {date}", { date: until }) : "",
       ]
         .filter(Boolean)
         .join(" · ");
@@ -418,7 +433,7 @@
       const onCode = async () => {
         try {
           await navigator.clipboard.writeText(c.code);
-          $("#po-code span").textContent = "Copied ✓";
+          $("#po-code span").textContent = tr("copiedCode", "Copied ✓");
         } catch {
           /* storage or clipboard blocked: nothing to do */
         }

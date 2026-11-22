@@ -18,21 +18,31 @@ import Intro from "../components/Intro.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { getContent, siteData, jsonForScript } from "../lib/content.mjs";
-/* contact, intro, protection, About facts, testimonials for the browser scripts (from the admin Content panel) */
-const siteJson = jsonForScript(siteData(await getContent(), "en"));
-const DEFAULT_DESC = "Syasya&Realis is an independent creative studio by Syasya Ahmad: photography, videography, montage and graphic design for brands, fashion and film.";
-const { title, page, intro = false, description = DEFAULT_DESC, noindex = false } = Astro.props;
+import { t, langInfo, alternates } from "../i18n/index.mjs";
+const { page, intro = false, noindex = false, lang = "en" } = Astro.props;
+const T = t(lang);
+const L = langInfo(lang);
+const META = T.meta[page === "404" ? "notfound" : page] || T.meta.home;
+const title = Astro.props.title || META.title;
+const description = Astro.props.description || META.desc;
+const DEFAULT_DESC = t("en").meta.home.desc;
+/* contact, intro, protection, About facts, testimonials + interface text for the browser scripts */
+const siteJson = jsonForScript({ ...siteData(await getContent(), lang), lang, langName: L.name, i18n: { ...T.js, facts: T.about.facts, services: T.home.services } });
+/* the same page in the other languages (hreflang); the 404 page has none */
+const PATHS = { index: "/", about: "/about", faq: "/faq", guidelines: "/guidelines" };
+const alts = PATHS[page] ? alternates(PATHS[page]) : [];
+const abs = p => (Astro.site ? new URL(p, Astro.site).href : p);
 /* absolute URLs need the live domain: set SITE_URL (e.g. https://syasyarealis.com) when building for hosting */
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : null;
 const ogImage = Astro.site ? new URL("/brand/og-image.jpg", Astro.site).href : "/brand/og-image.jpg";
-const ld = page === "index" ? {
+const ld = page === "index" && lang === "en" ? {
   "@context": "https://schema.org", "@type": "ProfessionalService", name: "Syasya&Realis", description: DEFAULT_DESC,
   founder: { "@type": "Person", name: "Syasya Ahmad" }, image: ogImage, logo: Astro.site ? new URL("/brand/apple-touch-icon.png", Astro.site).href : undefined,
   url: Astro.site ? Astro.site.href : undefined, knowsAbout: ["Photography", "Videography", "Montage design", "Graphic design"]
 } : null;
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang={L.hreflang}>
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -42,10 +52,13 @@ const ld = page === "index" ? {
     <!-- website design and code: John's Tech & Co · photos, videos and designs: Syasya&Realis -->
     {noindex && <meta name="robots" content="noindex">}
     {canonical && <link rel="canonical" href={canonical}>}
+    {alts.map(a => <link rel="alternate" hreflang={a.hreflang} href={abs(a.url)}>)}
+    {alts.length > 0 && <link rel="alternate" hreflang="x-default" href={abs(alts[0].url)}>}
     <meta property="og:site_name" content="Syasya&amp;Realis">
     <meta property="og:title" content={title}>
     <meta property="og:description" content={description}>
     <meta property="og:type" content="website">
+    <meta property="og:locale" content={L.hreflang.replace("-", "_")}>
     {canonical && <meta property="og:url" content={canonical}>}
     <meta property="og:image" content={ogImage}>
     <meta property="og:image:width" content="1200">
@@ -61,10 +74,10 @@ const ld = page === "index" ? {
   <body class="v2 duo ref sr" data-page={page}>
     <script type="application/json" id="site-data" is:inline set:html={siteJson}></script>
     <Progress />
-    {intro && <Intro />}
-    <Header />
+    {intro && <Intro lang={lang} />}
+    <Header lang={lang} page={page} />
     <slot />
-    <Footer />
+    <Footer lang={lang} />
     <script is:inline defer src="/js/01-settings.js"></script>
     <script is:inline defer src="/js/02-site.js"></script>
     <script is:inline defer src="/js/03-pages.js"></script>

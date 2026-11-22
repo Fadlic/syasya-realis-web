@@ -7,6 +7,9 @@ import globals from "globals";
 const shared = {
   SITE: "readonly",
   SITE_DATA: "readonly",
+  LANG: "readonly",
+  I18N: "readonly",
+  tr: "readonly",
   WORK: "readonly",
   PHOTOS: "readonly",
   DESIGN: "readonly",

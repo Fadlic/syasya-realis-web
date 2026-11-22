@@ -30,7 +30,7 @@
   const brief = () => {
     const svcs = [...f.querySelectorAll("input[name=svc]:checked")].map(x => x.value).join(", ") || "-";
     const pc = $("#booking-code").value;
-    return `Hi ${SITE.name}, I'd like to start a project.${pc ? `\n\nBooking code: ${pc} (pop-up offer)` : ""}\n\nName: ${f.name.value || "-"}\nCompany: ${f.company.value || "-"}\nEmail: ${f.email.value || "-"}\nServices: ${svcs}\nTimeline: ${f.timeline.value}\n\n${f.msg.value || ""}`;
+    return `Hi ${SITE.name}, I'd like to start a project.${pc ? `\n\nBooking code: ${pc} (pop-up offer)` : ""}\n\nName: ${f.name.value || "-"}\nCompany: ${f.company.value || "-"}\nEmail: ${f.email.value || "-"}\nServices: ${svcs}\nTimeline: ${f.timeline.value}${LANG === "en" ? "" : `\nPreferred language: ${SITE_DATA.langName || LANG}`}\n\n${f.msg.value || ""}`;
   };
   const update = () => {
     const t = brief();
@@ -48,6 +48,21 @@
       e.preventDefault();
       $("#outText").textContent = brief();
       $("#out").classList.add("show");
+    }
+  });
+})();
+
+/* language switcher: close it on Escape or a click outside */
+(() => {
+  const d = document.getElementById("langPick");
+  if (!d) return;
+  document.addEventListener("click", e => {
+    if (d.open && !d.contains(e.target)) d.open = false;
+  });
+  d.addEventListener("keydown", e => {
+    if (e.key === "Escape" && d.open) {
+      d.open = false;
+      d.querySelector("summary").focus();
     }
   });
 })();

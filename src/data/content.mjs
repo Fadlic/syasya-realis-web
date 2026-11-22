@@ -9,19 +9,16 @@
      _words_   → the accent style of that spot (italic serif in headings,
                  highlighted italic in paragraphs)
      new line  → line break (headings only)
-   Page text is stored per language: pages.en, pages.id, pages.ms, pages.zh,
-   pages.ar, pages.ta. English is the main language; the website shows only
-   English until the language versions are switched on.
+   Page text is stored per language: pages.en, pages.id, pages.ms. English is
+   the main language at "/"; Indonesian and Malay are at /id/ and /ms/.
    ===================================================================== */
 import { WORK, PHOTOS, DESIGN } from "./archive.mjs";
+import { PAGE_DRAFTS } from "../i18n/index.mjs";
 
 export const LANGS = [
   { code: "en", name: "English", dir: "ltr", main: true },
   { code: "id", name: "Bahasa Indonesia", dir: "ltr" },
   { code: "ms", name: "Bahasa Melayu", dir: "ltr" },
-  { code: "zh", name: "中文", dir: "ltr" },
-  { code: "ar", name: "العربية", dir: "rtl" },
-  { code: "ta", name: "தமிழ்", dir: "ltr" },
 ];
 
 export const DEFAULTS = {
@@ -136,6 +133,8 @@ export const DEFAULTS = {
       },
       testimonials: [], // { quote, name, role } — real client quotes only; the section is hidden while empty
     },
+    /* id, ms: draft translations by Claude (src/i18n/<lang>.mjs) — a native speaker should check them */
+    ...PAGE_DRAFTS,
   },
 
   /* ---------- archive (media paths: "media/…" in the site, or a full Storage URL) ---------- */

@@ -8,7 +8,8 @@
   const PAGE = document.body.dataset.page || "index";
 
   /* old links such as /#about-us → the new page */
-  const OLD = { "#about-us": "/about", "#brand-guidelines": "/guidelines", "#faq": "/faq" };
+  const pre = LANG === "en" ? "" : "/" + LANG;
+  const OLD = { "#about-us": pre + "/about", "#brand-guidelines": pre + "/guidelines", "#faq": pre + "/faq" };
   if (PAGE === "index" && OLD[location.hash]) {
     location.replace(OLD[location.hash]);
     return;
@@ -20,12 +21,13 @@
   /* about page: facts + testimonials */
   const factsBox = $("#ab-facts");
   if (factsBox) {
+    const F = I18N.facts || {};
     const facts = [
-      ["Disciplines", "Photography · videography · montage design · graphic design"],
-      ["Formats", "16:9 · 9:16 · 1:1 · 4:5"],
-      ["Based in", ABOUT.based],
-      ["Founded", ABOUT.founded],
-      ["Team", ABOUT.team],
+      [F.disciplines || "Disciplines", F.disciplinesV || "Photography · videography · montage design · graphic design"],
+      [F.formats || "Formats", "16:9 · 9:16 · 1:1 · 4:5"],
+      [F.based || "Based in", ABOUT.based],
+      [F.founded || "Founded", ABOUT.founded],
+      [F.team || "Team", ABOUT.team],
     ];
     factsBox.replaceChildren(
       ...facts
@@ -77,8 +79,6 @@
 
   /* active menu item + title (follows SITE.name like before) */
   $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === PAGE));
-  const TITLES = { about: "About", guidelines: "Brand guidelines", faq: "FAQ", 404: "Page not found" };
-  document.title = TITLES[PAGE] ? `${TITLES[PAGE]} — ${SITE.name}` : `${SITE.name} — Visual Narratives & Moving Art`;
 
   /* sub-pages: show everything at once, as the old page switch did */
   if (PAGE !== "index") $$("main .rv").forEach(el => el.classList.add("in"));
@@ -100,6 +100,6 @@
       return;
     }
     if (PAGE === "index") document.querySelector(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    else location.href = "/" + target;
+    else location.href = (LANG === "en" ? "/" : `/${LANG}/`) + target;
   };
 })();

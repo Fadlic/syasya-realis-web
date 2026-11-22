@@ -12,6 +12,7 @@ for f in ("config.js", "live.js"):  # live Supabase hooks are blocked in the pre
     os.remove(os.path.join(OUT, "js", f))
 
 PAGES = {"index": "index.html", "about": "about/index.html", "guidelines": "guidelines/index.html", "faq": "faq/index.html"}
+LANGS = [d for d in ("id", "ms") if os.path.isdir(os.path.join(DIST, d))]
 ROUTE = {"/about": "about.html", "/guidelines": "guidelines.html", "/faq": "faq.html"}
 
 # storage shim: the preview frame may refuse sessionStorage/localStorage
@@ -23,6 +24,10 @@ def fix_links(html):
     html = re.sub(r'(href|src)="/_astro/', r'\1="assets/', html)
     html = html.replace("url(/_astro/", "url(assets/")   # small stylesheets Astro inlines into the page
     html = re.sub(r'(href|src)="/(brand|media|js)/', r'\1="\2/', html)
+    # other languages: /id/ → id-index.html, /id/about → id-about.html (flat files in the preview)
+    for L in LANGS:
+        html = re.sub(rf'href="/{L}/(#[^"]*)?"', lambda m: f'href="{L}-index.html{m.group(1) or ""}"', html)
+        html = re.sub(rf'href="/{L}/(about|guidelines|faq)/?(#[^"]*)?"', lambda m: f'href="{L}-{m.group(1)}.html{m.group(2) or ""}"', html)
     html = re.sub(r'href="/#', 'href="index.html#', html)
     html = html.replace('href="/"', 'href="index.html"')
     for r, f in ROUTE.items():
@@ -37,6 +42,11 @@ PAGES["404"] = "404.html"
 for name, src in PAGES.items():
     html = open(os.path.join(DIST, src), encoding="utf-8").read()
     open(os.path.join(OUT, "index.html" if name == "index" else ("404.html" if name == "404" else name + ".html")), "w", encoding="utf-8").write(fix_links(html))
+for L in LANGS:
+    for name in ("index", "about", "guidelines", "faq"):
+        src = os.path.join(DIST, L, "index.html" if name == "index" else name + "/index.html")
+        html = open(src, encoding="utf-8").read()
+        open(os.path.join(OUT, f"{L}-{name}.html"), "w", encoding="utf-8").write(fix_links(html))
 
 for f in os.listdir(os.path.join(OUT, "assets")):
     if f.endswith(".css"):

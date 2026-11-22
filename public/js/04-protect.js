@@ -13,7 +13,7 @@ const PROTECT = Object.assign({ enabled: true, watermark: true }, SITE_DATA.prot
   note.className = "guard-note";
   note.setAttribute("role", "status");
   note.innerHTML = "<span></span>";
-  note.firstChild.textContent = `© ${SITE.name} — please ask before using our work.`;
+  note.firstChild.textContent = tr("protect", "© {name} — please ask before using our work.", { name: SITE.name });
   b.appendChild(note);
   let t;
   const tell = () => {

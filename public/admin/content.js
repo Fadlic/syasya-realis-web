@@ -942,7 +942,7 @@
       L = CFG.langs.find(l => l.code === lang);
     $("#cmLangNote").textContent = L.main
       ? "English is the main language and is on the website."
-      : `${L.name}: not on the website yet — the language versions come next. Empty fields use the English text (shown greyed).`;
+      : `${L.name} (/${L.code}/ on the website): the text below starts as a DRAFT translation by Claude — have a native speaker check it before launch. A field left empty uses the draft text again.`;
     $("#cmPnav").replaceChildren(
       ...CFG.fields.map((x, i) =>
         h(

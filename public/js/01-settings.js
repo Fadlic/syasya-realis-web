@@ -11,6 +11,11 @@ const SITE_DATA = (() => {
     return {};
   }
 })();
+/* interface text in the page's language (src/i18n/<lang>.mjs → js); English when a key is missing */
+const LANG = SITE_DATA.lang || "en";
+const I18N = SITE_DATA.i18n || {};
+const tr = (key, fallback, vars) =>
+  String(I18N[key] ?? fallback).replace(/\{(\w+)\}/g, (m, k) => (vars && k in vars ? vars[k] : m));
 /* About page facts — an empty value hides that row on the live site */
 const ABOUT = Object.assign({ based: "", founded: "", team: "" }, SITE_DATA.about);
 /* Testimonials — real client quotes only ({ quote, name, role }). The section is hidden while empty. */
@@ -24,8 +29,8 @@ const SITE = {
   instagram: SITE_DATA.instagram || "#",
   whatsapp: SITE_DATA.whatsapp || "#",
   whatsappNumber: SITE_DATA.whatsappNumber || "", // used by "Send via WhatsApp"
-  showreel: "media/showreel.mp4", // hero background + showreel
-  showreelPoster: "media/showreel.jpg",
+  showreel: "/media/showreel.mp4", // hero background + showreel
+  showreelPoster: "/media/showreel.jpg",
 };
 
 /* Archive (films, photos, designs): edited in the admin Content panel (built-in: src/data/archive.mjs). Astro renders it into the
@@ -44,7 +49,7 @@ const PHOTOS = ARCHIVE.photos || [];
 const FRAME = "film"; // "film" = film strip frames · "devices" = MacBook / iPad / iPhone
 const PREVIEW_SECONDS = 10; // hover preview length for videos
 const CLIENTS = ["J Luxe", "Unisel"];
-const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic Design"]; // the strip under the cover   // brands from the work above
+const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Montage Design", "Graphic Design"]; // the strip under the cover
 
 /* ===================================================================== */
 
@@ -65,7 +70,6 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
   $$("[data-email]").forEach(e => (e.textContent = SITE.email));
   $$("[data-ig]").forEach(a => (a.href = SITE.instagram));
   $$("[data-wa]").forEach(a => (a.href = SITE.whatsapp));
-  document.title = `${SITE.name} — Visual Narratives & Moving Art`;
   $("#yr").textContent = new Date().getFullYear();
 
   /* placeholder helper: shows a tinted tile with the file name until the file exists */
@@ -246,7 +250,7 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
     const cats = ["All", ...new Set(WORK.map(w => w.cat))];
     cats.forEach(c => {
       const b = document.createElement("button");
-      b.textContent = c;
+      b.textContent = c === "All" ? tr("all", "All") : c;
       b.setAttribute("aria-pressed", c === "All");
       b.onclick = () => {
         $$("#filters button").forEach(x => x.setAttribute("aria-pressed", x === b));
@@ -338,7 +342,7 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
       const t = document.createElement("button");
       t.type = "button";
       t.className = "lb-th";
-      t.setAttribute("aria-label", `Open ${i + 1} of ${list.length}`);
+      t.setAttribute("aria-label", tr("open", "Open {n} of {total}", { n: i + 1, total: list.length }));
       const s = art(mode, i);
       if (s) t.style.backgroundImage = `url("${s}")`;
       t.onclick = () => {
@@ -356,7 +360,7 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
     const frame = document.createElement("div");
     frame.className = "lb-frame";
     if (mode === "reel") {
-      $("#lbEye").textContent = "Showreel";
+      $("#lbEye").textContent = tr("showreel", "Showreel");
       $("#lbTitle").textContent = SITE.name;
       $("#lbCount").textContent = "";
       frame.appendChild(
@@ -373,7 +377,7 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
     const list = mode === "video" ? WORK : mode === "design" ? DESIGN : PHOTOS;
     if (mode === "video") {
       const w = WORK[idx];
-      $("#lbEye").textContent = `Film · ${w.cat}`;
+      $("#lbEye").textContent = `${tr("film", "Film")} · ${w.cat}`;
       $("#lbTitle").textContent = w.title;
       frame.appendChild(
         vid(w.video, w.poster, `${w.video.split("/").pop()} not uploaded yet`, idx + 1, {
@@ -385,12 +389,12 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
       );
     } else if (mode === "design") {
       const d = DESIGN[idx];
-      $("#lbEye").textContent = `Design · ${d.cat}`;
+      $("#lbEye").textContent = `${tr("design", "Design")} · ${d.cat}`;
       $("#lbTitle").textContent = d.title;
       frame.appendChild(img(d.src, `${d.src.split("/").pop()} not uploaded yet`, idx + 3, d.title));
     } else {
-      $("#lbEye").textContent = "Stills";
-      $("#lbTitle").textContent = `Photograph ${idx + 1}`;
+      $("#lbEye").textContent = tr("stills", "Stills");
+      $("#lbTitle").textContent = `${tr("photograph", "Photograph")} ${idx + 1}`;
       frame.appendChild(
         img(PHOTOS[idx].src, `${PHOTOS[idx].src.split("/").pop()} not uploaded yet`, idx, `Photograph ${idx + 1}`)
       );
@@ -407,8 +411,8 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
     next.className = "lb-nav lb-next";
     prev.textContent = "←";
     next.textContent = "→";
-    prev.setAttribute("aria-label", "Previous");
-    next.setAttribute("aria-label", "Next");
+    prev.setAttribute("aria-label", tr("prev", "Previous"));
+    next.setAttribute("aria-label", tr("next", "Next"));
     prev.onclick = () => {
       idx = (idx - 1 + list.length) % list.length;
       render();
@@ -493,18 +497,18 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
     } catch {
       /* storage or clipboard blocked: nothing to do */
     }
-    hintEl.textContent = ok ? okText : "Select to copy";
+    hintEl.textContent = ok ? okText : tr("selectToCopy", "Select to copy");
     setTimeout(() => (hintEl.textContent = resetText), 2000);
   };
   if (HOME) {
-    $("#copyMail").onclick = () => copy(SITE.email, $("#copyHint"), "Copied ✓", "Copy");
+    $("#copyMail").onclick = () => copy(SITE.email, $("#copyHint"), tr("copied", "Copied ✓"), tr("copy", "Copy"));
 
     /* brief form: no server — builds a brief the visitor copies and sends */
     $("#brief").addEventListener("submit", e => {
       e.preventDefault();
       const f = e.target;
       if (!f.name.value.trim()) {
-        $("#formNote").textContent = "Please add your name.";
+        $("#formNote").textContent = tr("addName", "Please add your name.");
         f.name.focus();
         return;
       }
@@ -513,13 +517,14 @@ const DISCIPLINES = ["Photography", "Videography", "Montage Design", "Graphic De
 Company: ${f.company.value || "—"}
 Email: ${f.email.value || "—"}
 Services: ${svcs}
-Timeline: ${f.timeline.value}
+Timeline: ${f.timeline.value}${LANG === "en" ? "" : `\nPreferred language: ${SITE_DATA.langName || LANG}`}
 
 ${f.msg.value || ""}`;
       $("#out").classList.add("show");
-      $("#formNote").textContent = "Brief ready below.";
+      $("#formNote").textContent = tr("briefReady", "Brief ready below.");
     });
-    $("#copyBrief").onclick = e => copy($("#outText").textContent, e.target, "Copied ✓", "Copy brief");
+    $("#copyBrief").onclick = e =>
+      copy($("#outText").textContent, e.target, tr("copied", "Copied ✓"), tr("copyBrief", "Copy brief"));
   } /* end home page only */
 
   /* wordmark fit */
