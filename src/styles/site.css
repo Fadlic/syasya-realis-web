@@ -5419,16 +5419,21 @@ body.ref .app .ph-wrap {
 }
 .sc-l {
   display: inline-block;
-  will-change: translate, rotate;
 }
-#photography,
-#design {
+main > section,
+footer {
   overflow-x: clip;
 }
 @media (prefers-reduced-motion: reduce) {
   .sc-l,
   #gallery .ph-item,
-  #designGrid .d-item {
+  #designGrid .d-item,
+  #services .svc,
+  #process .step,
+  #about .facts > div,
+  #contact .reach > *,
+  footer .fgrid > div,
+  #manifesto .mf {
     translate: none !important;
     rotate: none !important;
     scale: none !important;
