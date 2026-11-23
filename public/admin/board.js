@@ -249,10 +249,35 @@
 
   /* ---------- nav (the hash keeps the view: /admin/#inbox, #cal, #content, #pop, #rep, #set, #sys) ---------- */
   const VIEWS = ["dash", "inbox", "cal", "content", "pop", "rep", "set", "sys"];
+  // a single marker slides to the active nav item; it jumps (no slide) on first paint and on resize
+  const placeInd = (still = false) => {
+    const side = $(".side"),
+      b = $(".nav-b[aria-current=\"page\"]");
+    if (!side || !b) return;
+    let ind = $(".nav-ind");
+    if (!ind) {
+      ind = document.createElement("span");
+      ind.className = "nav-ind";
+      ind.setAttribute("aria-hidden", "true");
+      side.prepend(ind);
+      side.classList.add("has-ind");
+      still = true;
+    }
+    ind.classList.toggle("still", still);
+    ind.style.width = b.offsetWidth + "px";
+    ind.style.height = b.offsetHeight + "px";
+    ind.style.transform = `translate(${b.offsetLeft}px, ${b.offsetTop}px)`;
+    if (still) requestAnimationFrame(() => ind.classList.remove("still"));
+    // on narrow screens the nav is a scrolling row: keep the active item in view
+    if (side.scrollWidth > side.clientWidth) side.scrollTo({ left: Math.max(0, b.offsetLeft - 16), behavior: still ? "auto" : "smooth" });
+  };
+  addEventListener("resize", () => placeInd(true));
+  if ("ResizeObserver" in window && $(".side")) new ResizeObserver(() => placeInd(true)).observe($(".side"));
   const show = v => {
     if (!VIEWS.includes(v)) v = "dash";
     $$(".nav-b").forEach(b => b.toggleAttribute("aria-current", false));
     $(`.nav-b[data-v="${v}"]`).setAttribute("aria-current", "page");
+    placeInd();
     $$(".view").forEach(x => (x.hidden = x.id !== "v-" + v));
     render();
     $("#main").focus({ preventScroll: true });
