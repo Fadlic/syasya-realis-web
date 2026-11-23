@@ -470,7 +470,7 @@ section {
   min-height: 340px;
   display: flex;
   flex-direction: column;
-  transition: background 0.5s var(--ease);
+  transition: background 0.25s ease;
 }
 .svc:nth-child(4n) {
   border-right: 0;
@@ -904,10 +904,14 @@ section {
   color: var(--bg);
   display: grid;
   place-items: center;
-  transform: scale(0);
-  transition: transform 0.45s var(--ease);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    transform 0.25s var(--ease-out),
+    opacity 0.2s var(--ease-out);
 }
 .item:hover .cursor {
+  opacity: 1;
   transform: scale(1);
 }
 .item-meta {
@@ -1318,7 +1322,16 @@ footer {
 }
 .lb.open {
   display: flex;
-  animation: lbIn 0.45s var(--ease);
+  animation: lbIn 0.25s var(--ease-out);
+}
+.lb.open:not(.closing) .lb-stage {
+  animation: lbStage 0.3s var(--ease-out);
+}
+@keyframes lbStage {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
 @keyframes lbIn {
   from {
@@ -1588,6 +1601,7 @@ footer {
 }
 @media (prefers-reduced-motion: reduce) {
   .lb.open,
+  .lb.open .lb-stage,
   .lb-stage.in .lb-frame {
     animation: none;
   }
@@ -4300,10 +4314,10 @@ body.sr .cover-quote em.hl {
 .idt img {
   width: 40%;
   height: auto;
-  transition: transform 0.8s var(--ease);
+  transition: transform 0.35s var(--ease-out);
 }
 .idt:hover img {
-  transform: scale(1.06) rotate(-2deg);
+  transform: scale(1.04);
 }
 .idt.k {
   background: #0a0807;
@@ -4458,10 +4472,10 @@ body.sr .cover-quote em.hl {
 }
 .idt .srm {
   width: 40%;
-  transition: transform 0.8s var(--ease);
+  transition: transform 0.35s var(--ease-out);
 }
 .idt:hover .srm {
-  transform: scale(1.06) rotate(-2deg);
+  transform: scale(1.04);
 }
 @media (max-width: 640px) {
   .idt .srm {
@@ -4723,11 +4737,11 @@ body.sr .cover-quote em.hl {
   align-content: end;
   gap: 6px;
   border: 1px solid var(--line);
-  transition: transform 0.5s var(--ease);
+  transition: transform 0.25s var(--ease-out);
   position: relative;
 }
 .ci-pal button:hover {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
 }
 .ci-pal b {
   font-family: var(--display);
@@ -5656,9 +5670,10 @@ main section[tabindex="-1"]:focus {
     background 0.4s,
     border-color 0.4s,
     padding 0.4s,
-    translate 0.45s var(--ease-out);
+    translate 0.3s var(--ease-out);
 }
 .nav.tuck {
+  transition-duration: 0.4s, 0.4s, 0.4s, 0.45s;
   translate: 0 -100%;
   transition-timing-function: ease, ease, ease, var(--ease-in-out);
 }

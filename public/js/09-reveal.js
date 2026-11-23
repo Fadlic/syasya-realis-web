@@ -71,7 +71,7 @@
     stop && stop();
     const from = scrollY,
       dist = y - from,
-      dur = Math.min(1400, Math.max(600, Math.abs(dist) * 0.35)),
+      dur = Math.min(900, Math.max(500, Math.abs(dist) * 0.3)),
       t0 = performance.now();
     let raf;
     const prev = html.style.scrollBehavior;
@@ -104,6 +104,15 @@
       running = false,
       last = 0;
     const max = () => html.scrollHeight - innerHeight;
+    // a mouse wheel moves in whole notches (lines, or big round pixel steps); a trackpad sends small,
+    // often fractional deltas, and once one is seen the page stays native for a moment
+    let padUntil = 0;
+    const isMouseWheel = e => {
+      if (e.deltaMode !== 0) return true;
+      const notch = e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 50;
+      if (!notch) padUntil = e.timeStamp + 400;
+      return notch && e.timeStamp > padUntil;
+    };
     const locked = () =>
       document.body.classList.contains("intro-on") ||
       getComputedStyle(document.body).overflowY === "hidden" ||
@@ -135,6 +144,7 @@
       "wheel",
       e => {
         if (e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        if (!isMouseWheel(e)) return; // trackpads already glide; smoothing them twice only adds lag
         if (locked() || scrollsInside(e.target)) return;
         e.preventDefault();
         stop && stop(); // a wheel turn takes over from a section glide
