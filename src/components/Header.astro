@@ -15,7 +15,6 @@ const globe = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke
     <a class="l" href={H("/about")} data-nav="about">{N.about}</a>
     <a class="l" href={H("/#work")}>{N.archive}</a>
     <a class="l" href={H("/#services")}>{N.services}</a>
-    <a class="l" href={H("/guidelines")} data-nav="guidelines">{N.guidelines}</a>
     <a class="l" href={H("/faq")} data-nav="faq">{N.faq}</a>
     <details class="lang" id="langPick">
       <summary aria-label={`${N.language}: ${cur.name}`}><Fragment set:html={globe} /><span class="mono">{cur.short}</span></summary>
@@ -32,7 +31,7 @@ const globe = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke
 </header>
 
 <div class="sheet" id="sheet" inert>
-  <nav><a href={H("/about")} data-nav="about">{N.about}</a><a href={H("/#work")}>{N.archive}</a><a href={H("/#services")}>{N.services}</a><a href={H("/guidelines")} data-nav="guidelines">{N.guidelines}</a><a href={H("/faq")} data-nav="faq">{N.faq}</a><a href={H("/#contact")}>{N.contact}</a></nav>
+  <nav><a href={H("/about")} data-nav="about">{N.about}</a><a href={H("/#work")}>{N.archive}</a><a href={H("/#services")}>{N.services}</a><a href={H("/faq")} data-nav="faq">{N.faq}</a><a href={H("/#contact")}>{N.contact}</a></nav>
   <div class="sheet-foot">
     <div class="sheet-lang mono" role="group" aria-label={N.language}>
       {alts.map((a) => <a href={a.url} hreflang={a.hreflang} lang={a.hreflang} aria-current={a.code === lang ? "true" : undefined} data-lang={a.code}>{a.short}</a>)}

@@ -470,7 +470,7 @@ section {
   min-height: 340px;
   display: flex;
   flex-direction: column;
-  transition: background 0.5s var(--ease);
+  transition: background 0.25s ease;
 }
 .svc:nth-child(4n) {
   border-right: 0;
@@ -904,10 +904,14 @@ section {
   color: var(--bg);
   display: grid;
   place-items: center;
-  transform: scale(0);
-  transition: transform 0.45s var(--ease);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    transform 0.25s var(--ease-out),
+    opacity 0.2s var(--ease-out);
 }
 .item:hover .cursor {
+  opacity: 1;
   transform: scale(1);
 }
 .item-meta {
@@ -1318,7 +1322,16 @@ footer {
 }
 .lb.open {
   display: flex;
-  animation: lbIn 0.45s var(--ease);
+  animation: lbIn 0.25s var(--ease-out);
+}
+.lb.open:not(.closing) .lb-stage {
+  animation: lbStage 0.3s var(--ease-out);
+}
+@keyframes lbStage {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
 }
 @keyframes lbIn {
   from {
@@ -1588,6 +1601,7 @@ footer {
 }
 @media (prefers-reduced-motion: reduce) {
   .lb.open,
+  .lb.open .lb-stage,
   .lb-stage.in .lb-frame {
     animation: none;
   }
@@ -2021,6 +2035,9 @@ body.v2 .ph-item img {
 .ab-hero .lead {
   margin-top: clamp(24px, 4vh, 40px);
   max-width: 52ch;
+}
+.ab-hero .lead + .lead {
+  margin-top: 16px;
 }
 .profile {
   display: grid;
@@ -2550,7 +2567,7 @@ body.protect.no-wm .lb-stage::after {
 
 /* ===== palette v3 fixes ===== */
 :root {
-  --rose-t: #f0283c;
+  --rose-t: #f43d50;
 }
 /* small red text uses the brighter red so it stays readable on black (4.8:1) */
 body.v2 .eyebrow .num,
@@ -2822,8 +2839,8 @@ body.ref {
     ),
     #0a0807;
   --tri-blue:
-    radial-gradient(55% 75% at 100% 100%, #e20a21 0%, #8a0713 22%, #0a0807 40%, rgba(10, 8, 7, 0) 46%),
-    radial-gradient(130% 120% at 12% 0%, #d6f1fc 0%, #9dd9f3 40%, #6db9de 74%, #3f86ac 100%);
+    radial-gradient(42% 60% at 100% 100%, #e20a21 0%, #8a0713 22%, #0a0807 40%, rgba(10, 8, 7, 0) 46%),
+    radial-gradient(130% 120% at 12% 0%, #d6f1fc 0%, #9dd9f3 45%, #6db9de 100%);
 }
 /* hero: red bloom into black, faint blue rim light */
 body.ref .hero-media .ph::before {
@@ -4297,10 +4314,10 @@ body.sr .cover-quote em.hl {
 .idt img {
   width: 40%;
   height: auto;
-  transition: transform 0.8s var(--ease);
+  transition: transform 0.35s var(--ease-out);
 }
 .idt:hover img {
-  transform: scale(1.06) rotate(-2deg);
+  transform: scale(1.04);
 }
 .idt.k {
   background: #0a0807;
@@ -4455,10 +4472,10 @@ body.sr .cover-quote em.hl {
 }
 .idt .srm {
   width: 40%;
-  transition: transform 0.8s var(--ease);
+  transition: transform 0.35s var(--ease-out);
 }
 .idt:hover .srm {
-  transform: scale(1.06) rotate(-2deg);
+  transform: scale(1.04);
 }
 @media (max-width: 640px) {
   .idt .srm {
@@ -4720,11 +4737,11 @@ body.sr .cover-quote em.hl {
   align-content: end;
   gap: 6px;
   border: 1px solid var(--line);
-  transition: transform 0.5s var(--ease);
+  transition: transform 0.25s var(--ease-out);
   position: relative;
 }
 .ci-pal button:hover {
-  transform: translateY(-6px);
+  transform: translateY(-3px);
 }
 .ci-pal b {
   font-family: var(--display);
@@ -5416,36 +5433,36 @@ body.ref .app .ph-wrap {
   }
 }
 
-/* scroll scatter (public/js/09-scatter.js) */
-.sc-w {
-  display: inline-block;
-  white-space: nowrap;
+/* ===== scroll reveal + smooth section navigation (public/js/09-reveal.js) =====
+   Content fades up softly the first time it enters the screen; the classes are removed once it has
+   arrived, so hover transitions are untouched. Section links land below the fixed nav. */
+html {
+  scroll-padding-top: 76px;
 }
-.sc-l {
-  display: inline-block;
+/* sections focused by a nav link (for screen readers) show no ring */
+main section[tabindex="-1"]:focus {
+  outline: none;
 }
-main > section,
-footer {
-  overflow-x: clip;
+.rv {
+  opacity: 0;
+  translate: 0 18px;
+  transition:
+    opacity 0.7s var(--ease-out) var(--rv-d, 0s),
+    translate 0.9s var(--ease-out) var(--rv-d, 0s);
+}
+.rv.rv-in {
+  opacity: 1;
+  translate: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .sc-l,
-  #gallery .ph-item,
-  #designGrid .d-item,
-  #services .svc,
-  #process .step,
-  #about .facts > div,
-  #contact .reach > *,
-  footer .fgrid > div,
-  #manifesto .mf {
-    translate: none !important;
-    rotate: none !important;
-    scale: none !important;
-    opacity: 1 !important;
+  html {
+    scroll-behavior: auto;
   }
-}
-.hero h1.sc-loose .ln {
-  overflow: visible;
+  .rv {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
 }
 
 /* ===== pop-up card motion =====
@@ -5645,4 +5662,173 @@ footer {
   .pcard > :not(.x) {
     opacity: 1;
   }
+}
+
+/* the header tucks away while reading down and returns on any upward scroll (02-site.js) */
+.nav {
+  transition:
+    background 0.4s,
+    border-color 0.4s,
+    padding 0.4s,
+    translate 0.3s var(--ease-out);
+}
+.nav.tuck {
+  transition-duration: 0.4s, 0.4s, 0.4s, 0.45s;
+  translate: 0 -100%;
+  transition-timing-function: ease, ease, ease, var(--ease-in-out);
+}
+
+/* page to page: the header stays put while the page underneath cross-fades and settles */
+@view-transition {
+  navigation: auto;
+}
+.nav {
+  view-transition-name: site-nav;
+}
+.progress {
+  view-transition-name: site-progress;
+}
+::view-transition-old(root) {
+  animation: vtOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vtIn 0.5s var(--ease-out) 0.06s both;
+}
+@keyframes vtOut {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vtIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  .nav.tuck {
+    translate: none;
+  }
+}
+
+/* ===== Impeccable pass: readability, tap targets, phone layout (fonts untouched) ===== */
+/* contrast: dark text on blue, white on red, never mid-tone on either */
+body.ref #process .steps .step .mono {
+  color: #fff;
+}
+body.ref #ab-mark .anat-note {
+  color: #0a0807;
+}
+body.ref .ci-type p {
+  color: #eef6fb;
+}
+body.ref #brand-guidelines section:has(> .ci-pal) .eyebrow span,
+body.ref #brand-guidelines section:has(> .ci-pal) .num {
+  color: #fff;
+}
+.lb-eye {
+  color: var(--rose-t);
+}
+.trailer .seg span {
+  color: rgba(157, 217, 243, 0.66);
+}
+.f input::placeholder,
+.f textarea::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+@media (max-width: 700px) {
+  /* on a phone the red corner shrinks and the second label straddles red and blue: set it on a black chip */
+  body.ref #process .eyebrow span:last-child,
+  body.ref #ab-mark .eyebrow span:last-child {
+    color: #eef6fb;
+    background: #0a0807;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+}
+
+/* functional labels never below 11px */
+.trailer .cap,
+.trailer .cap b {
+  font-size: 11px;
+}
+.lockup span {
+  font-size: max(11px, 0.62em);
+}
+.app dt,
+.pf .edge,
+.arch-jump a .mono {
+  font-size: 11px;
+}
+
+/* tap targets ≥ 44px; the hit area grows, the drawing stays the same */
+.burger::before,
+.foot a::before,
+.about-more::before,
+footer .fgrid > div > a::before,
+#ab-mark .eyebrow a::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+.burger::before {
+  inset: -14px -9px;
+}
+.foot a,
+.about-more,
+footer .fgrid > div > a,
+#ab-mark .eyebrow a {
+  position: relative;
+}
+@media (max-width: 760px) {
+  .lb-nav {
+    width: 44px;
+    height: 44px;
+  }
+  .lb-th {
+    width: 60px;
+    height: 44px;
+  }
+}
+
+/* phone: two photo columns instead of one long strip */
+@media (max-width: 700px) {
+  .gallery {
+    columns: 2;
+    column-gap: 8px;
+  }
+  .ph-item {
+    margin-bottom: 8px;
+  }
+}
+
+/* home: the contact form is the one call to action; the footer repeats it everywhere else */
+body:has(#contact .f) footer .fgrid .btn.fill {
+  display: none !important;
+}
+body.ref .svc p {
+  color: var(--ink-2);
+}
+
+/* polish: focus ring that reads on red, blue and black — red line with a light inner rim */
+body.v2 :focus-visible {
+  box-shadow: 0 0 0 3px #eef6fb;
+}
+body.v2 input:focus-visible,
+body.v2 textarea:focus-visible {
+  box-shadow: none;
+}
+/* name field flagged when a send is blocked */
+.f input[aria-invalid="true"] {
+  border-color: var(--rose-t);
+}
+/* pop-up close: 44px hit area around the 38px button */
+.pcard .x::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
 }

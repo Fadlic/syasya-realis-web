@@ -14,18 +14,8 @@ const A = pageText(await getContent(), lang).about;
     <div class="eyebrow mono"><span>(About) <span data-name>Syasya&Realis</span></span><span>{U.eyebrow}</span></div>
     <h1 set:html={heading(A.headline)} />
     <p class="lead" set:html={para(A.lead)} />
+    <p class="lead" set:html={para(A.p2)} />
     <figure class="ab-mark" aria-label={U.mark}><i class="srm light" aria-hidden="true"></i><figcaption class="lockup">Syasya&Realis<span>{U.studio}</span></figcaption></figure>
-  </section>
-
-  <section style="padding-top:0">
-    <div class="eyebrow mono"><span>{U.eyFounder}</span><span>Syasya Ahmad</span></div>
-    <div class="profile">
-      <div>
-        <p set:html={para(A.p1)} />
-        <p set:html={para(A.p2)} />
-      </div>
-      <dl class="facts-list" id="ab-facts"></dl>
-    </div>
   </section>
 
   <section style="padding-top:0" id="ab-name">
@@ -41,8 +31,8 @@ const A = pageText(await getContent(), lang).about;
     <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)" set:html={U.markHeading} />
     <div class="anat">
       <figure class="anat-mark" id="anatMark"><i class="srm light" aria-hidden="true"></i>
-        <b class="hs" data-k="s" style="left:24%;top:30%">S</b><b class="hs" data-k="r" style="left:78%;top:52%">R</b>
-        <b class="hs" data-k="amp" style="left:51%;top:24%">&amp;</b><b class="hs" data-k="dia" style="left:56%;top:55%">◆</b></figure>
+        <b class="hs" data-k="s" style="left:33%;top:43%">S</b><b class="hs" data-k="r" style="left:76%;top:49%">R</b>
+        <b class="hs" data-k="amp" style="left:54%;top:30%">&amp;</b><b class="hs" data-k="dia" style="left:56%;top:73%">◆</b></figure>
       <div>
         <ol class="anat-list">
           {U.anat.map(([big, h, p], i) => (

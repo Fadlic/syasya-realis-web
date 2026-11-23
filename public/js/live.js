@@ -170,9 +170,14 @@
       if (form.name.value.trim().length >= 2) return false;
       e.preventDefault();
       say(MESSAGES.invalid_name, "warn");
+      form.name.setAttribute("aria-invalid", "true");
+      form.name.setAttribute("aria-describedby", "saveStatus");
       form.name.focus();
       return true;
     };
+    form.name.addEventListener("input", () => {
+      if (form.name.value.trim().length >= 2) form.name.removeAttribute("aria-invalid");
+    });
     $("#sendWa")?.addEventListener(
       "click",
       async e => {
@@ -408,6 +413,9 @@
       const hint = $("#po-code span");
       hint.dataset.hint ??= hint.textContent;
       hint.textContent = hint.dataset.hint;
+      const codeBtn = $("#po-code");
+      codeBtn.dataset.label ??= codeBtn.getAttribute("aria-label");
+      codeBtn.setAttribute("aria-label", codeBtn.dataset.label);
       po.classList.add("show");
       po.setAttribute("aria-hidden", "false");
       document.body.classList.add("po-open");
@@ -446,8 +454,11 @@
           await navigator.clipboard.writeText(c.code);
           $("#po-code span").textContent = tr("copiedCode", "Copied ✓");
           $("#po-code").classList.add("copied");
+          $("#po-code").setAttribute("aria-label", tr("copiedCode", "Copied ✓"));
         } catch {
-          /* storage or clipboard blocked: nothing to do */
+          // clipboard blocked: select the code so the visitor can copy it by hand
+          $("#po-code span").textContent = tr("selectToCopy", "Select to copy");
+          getSelection().selectAllChildren($("#po-codev"));
         }
       };
       const onCta = () => {

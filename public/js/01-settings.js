@@ -116,7 +116,7 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
   const HOME = !!$("#top");
   if (HOME) {
     /* hero */
-    const hero = vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4", 0, { autoplay: true, preload: "auto" });
+    const hero = vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4", 0, { autoplay: true, preload: matchMedia("(max-width: 700px)").matches ? "metadata" : "auto" });
     $("#heroMedia").appendChild(hero);
     hero.play && hero.play().catch(() => {});
 
@@ -514,7 +514,11 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
       e.preventDefault();
       const f = e.target;
       if (!f.name.value.trim()) {
-        $("#formNote").textContent = tr("addName", "Please add your name.");
+        const st = $("#saveStatus");
+        st.textContent = tr("addName", "Please add your name.");
+        st.dataset.tone = "warn";
+        f.name.setAttribute("aria-invalid", "true");
+        f.name.setAttribute("aria-describedby", "saveStatus");
         f.name.focus();
         return;
       }
@@ -527,7 +531,8 @@ Timeline: ${f.timeline.value}${LANG === "en" ? "" : `\nPreferred language: ${SIT
 
 ${f.msg.value || ""}`;
       $("#out").classList.add("show");
-      $("#formNote").textContent = tr("briefReady", "Brief ready below.");
+      Object.assign($("#saveStatus"), { textContent: tr("briefReady", "Brief ready below.") }).dataset.tone = "ok";
+      f.name.removeAttribute("aria-invalid");
     });
     $("#copyBrief").onclick = e =>
       copy($("#outText").textContent, e.target, tr("copied", "Copied ✓"), tr("copyBrief", "Copy brief"));
