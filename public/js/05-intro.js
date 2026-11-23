@@ -36,6 +36,9 @@ const INTRO = Object.assign({ enabled: true, clipSeconds: 3.2, oncePerVisit: tru
   run(box0);
   function run(box) {
     document.body.classList.add("intro-on");
+    // the page behind the trailer is out of reach for Tab and screen readers until the visitor enters
+    const behind = [...document.body.children].filter(el => el !== box && !el.contains(box) && el.tagName !== "SCRIPT");
+    behind.forEach(el => (el.inert = true));
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches,
       touch = matchMedia("(hover: none)").matches;
     const tones = [
@@ -140,6 +143,7 @@ const INTRO = Object.assign({ enabled: true, clipSeconds: 3.2, oncePerVisit: tru
       }
       box.classList.add("out");
       document.body.classList.remove("intro-on");
+      behind.forEach(el => (el.inert = false));
       clearInterval(timer);
       clearInterval(tick);
       setTimeout(() => {

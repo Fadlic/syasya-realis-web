@@ -50,7 +50,7 @@
       box.replaceChildren(
         ...TESTIMONIALS.map(t => {
           const f = document.createElement("figure");
-          f.className = "quote rv in";
+          f.className = "quote";
           const q = document.createElement("blockquote");
           q.textContent = t.quote;
           const c = document.createElement("figcaption");
@@ -81,7 +81,6 @@
   $$("[data-nav]").forEach(a => a.classList.toggle("on", a.dataset.nav === PAGE));
 
   /* sub-pages: show everything at once, as the old page switch did */
-  if (PAGE !== "index") $$("main .rv").forEach(el => el.classList.add("in"));
 
   /* closing the mobile menu when a link to a section of the same page is used */
   document.addEventListener("click", e => {

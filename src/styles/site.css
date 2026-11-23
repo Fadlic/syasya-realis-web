@@ -968,8 +968,7 @@ section {
   position: relative;
   aspect-ratio: var(--ar, 4/5);
 }
-.ph-item:hover,
-.ph-item.rv.in:hover {
+.ph-item:hover {
   transform: translateY(-6px) scale(1.04);
   box-shadow:
     0 30px 60px -24px rgba(0, 0, 0, 0.85),
@@ -1052,7 +1051,7 @@ section {
 .step .mono {
   color: var(--ink-3);
 }
-.step h4 {
+.step h3 {
   font-size: 22px;
   letter-spacing: -0.035em;
   font-weight: 600;
@@ -1607,18 +1606,6 @@ body:has(.lb.open) .visit-notice {
   color: var(--bg);
 }
 
-/* reveal */
-.rv {
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 1s var(--ease),
-    transform 1s var(--ease);
-}
-.rv.in {
-  opacity: 1;
-  transform: none;
-}
 
 @media (max-width: 1000px) {
   .services {
@@ -1686,10 +1673,6 @@ body:has(.lb.open) .visit-notice {
   *::after {
     animation: none !important;
     transition: none !important;
-  }
-  .rv {
-    opacity: 1;
-    transform: none;
   }
   .hero h1 .ln > span {
     transform: none;
@@ -2438,23 +2421,39 @@ body.po-open {
 .visit-notice {
   position: fixed;
   left: 16px;
-  bottom: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
   z-index: 140;
-  max-width: 380px;
+  max-width: 360px;
   display: flex;
   gap: 12px;
   align-items: center;
   background: #141110;
   border: 1px solid var(--line-2);
-  border-radius: 14px;
-  padding: 12px 14px;
-  font-size: 13px;
+  border-radius: 12px;
+  padding: 6px 6px 6px 14px;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--ink-2);
   box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.9);
+  transition:
+    opacity 0.2s ease-in,
+    transform 0.2s ease-in;
+}
+.visit-notice.out {
+  opacity: 0;
+  transform: translateY(8px);
+}
+@media (max-width: 700px) {
+  .visit-notice {
+    left: 8px;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    max-width: none;
+  }
 }
 .visit-notice button {
   flex: none;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: 99px;
   border: 1px solid var(--line-2);
@@ -2773,7 +2772,7 @@ body.duo .ab-cta p .serif {
   color: var(--detail);
 }
 body.duo .svc h3,
-body.duo .step h4,
+body.duo .step h3,
 body.duo .usp h3 {
   color: var(--ink);
 }
@@ -3138,7 +3137,7 @@ body.sr .big {
   line-height: 0.95;
 }
 body.sr .svc h3,
-body.sr .step h4,
+body.sr .step h3,
 body.sr .usp h3,
 body.sr .item-meta h3,
 body.sr .facts b,
@@ -3246,7 +3245,7 @@ body.sr .ab-cta p,
 body.sr .wm,
 body.sr .mf blockquote p,
 body.sr .svc h3,
-body.sr .step h4,
+body.sr .step h3,
 body.sr .usp h3,
 body.sr .item-meta h3,
 body.sr .facts b,
@@ -3562,10 +3561,17 @@ body.sr .hero-row .acts {
   font-size: 11.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(238, 246, 251, 0.8);
+  color: var(--ink);
+  /* a Raven Black backing keeps the label readable over any clip, the red-graded ones too */
+  background: var(--bg);
+  padding: 6px 12px;
+  border-radius: 99px;
+}
+.trailer .cap:empty {
+  display: none;
 }
 .trailer .cap b {
-  color: var(--rose-t);
+  color: var(--ink); /* red on the red-graded clips read at 1.2:1 */
   font-weight: 500;
   margin-right: 10px;
 }
@@ -3588,8 +3594,10 @@ body.sr .hero-row .acts {
   font-size: 11.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(238, 246, 251, 0.7);
-  padding: 8px 12px;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 44px;
+  padding: 8px 16px;
   border-radius: 99px;
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
@@ -3845,7 +3853,7 @@ body.sr .hero-row .acts {
 /* B. projector reel */
 .proj {
   position: relative;
-  height: calc(var(--n, 7) * 75vh + 100vh);
+  height: calc(var(--n, 7) * 45vh + 100vh);
 }
 .proj-stick {
   position: sticky;
@@ -4011,7 +4019,26 @@ body.sr .hero-row .acts {
   position: absolute;
   right: var(--pad);
   bottom: clamp(24px, 7vh, 64px);
+  z-index: 2;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
   color: var(--ink-3);
+}
+.proj-hint a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 99px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.2s ease-out;
+}
+.proj-hint a:hover {
+  border-color: var(--ink-3);
 }
 /* C. raw → graded manifesto */
 .grade {
@@ -4078,6 +4105,12 @@ body.sr .hero-row .acts {
   right: 22px;
   color: var(--detail);
 }
+@media (max-width: 480px) {
+  /* too narrow for both labels on one line: the graded one drops below */
+  .grade .gl.r {
+    top: 40px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .beam {
     animation: none;
@@ -4088,10 +4121,14 @@ body.intro-on .vf {
 }
 @media (max-width: 700px) {
   .proj-hint {
+    top: 72px;
+    bottom: auto;
+  }
+  .proj-hint span {
     display: none;
   }
   .proj {
-    height: calc(var(--n, 7) * 55vh + 100vh);
+    height: calc(var(--n, 7) * 40vh + 100vh);
   }
 }
 .pf .fr .ph {
@@ -4315,7 +4352,7 @@ body.sr .cover-quote em.hl {
 }
 
 /* ===== Process: brief to delivery (V4.2) ===== */
-.step h4 {
+.step h3 {
   font-size: clamp(18px, 1.45vw, 21px);
   line-height: 1.2;
   text-wrap: balance;
@@ -4869,7 +4906,7 @@ body.sr .cover-quote em.hl {
 }
 .arch-jump a .mono {
   font-size: 10.5px;
-  color: var(--rose-t);
+  color: var(--detail); /* Powder Blue on Raven Black: 12:1 (the red read 3.9:1) */
 }
 .arch-jump a:hover {
   color: var(--ink);
@@ -4879,6 +4916,9 @@ body.sr .cover-quote em.hl {
   background: #fff;
   color: #0a0807;
   border-color: #fff;
+}
+.arch-jump a.on .mono {
+  color: var(--rose); /* Poppy Red on white: 4.9:1 (the lighter --rose-t was 4.1:1) */
 }
 
 /* ===== hero HUD sits inside the viewfinder corners (V4.3.1) ===== */
@@ -5095,10 +5135,11 @@ body.ref .app .ph-wrap {
   filter: none;
 }
 @media (hover: none) {
-  #projTrack .pf.on .fr > video,
-  #grid .item.lit :is(video, img),
-  #gallery .ph-item.lit > img,
-  #designGrid .d-item.lit .shot > img {
+  /* touch screens have no hover: media shows in colour at rest */
+  #projTrack .fr > video,
+  #grid .item :is(video, img),
+  #gallery .ph-item > img,
+  #designGrid .d-item .shot > img {
     filter: none;
   }
 }

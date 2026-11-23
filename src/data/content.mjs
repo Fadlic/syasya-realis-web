@@ -68,7 +68,7 @@ export const DEFAULTS = {
           },
           {
             title: "Montage Design",
-            text: "A considered arrangement of imagery, sound, and timing, transforming individual fragments into a seamless emotional narrative.",
+            text: "Imagery, sound and timing cut to one rhythm, turning separate clips into a single emotional story.",
           },
           {
             title: "Graphic Design",

@@ -53,6 +53,7 @@ export const ui = {
     filterWork: "Saring karya",
     archiveSections: "Bagian arsip",
     scrollHint: "Gulir untuk memutar reel",
+    skipReel: "Lewati ke foto",
     showMore: "Tampilkan foto lainnya",
     eyManifesto: "(02) Manifesto",
     believe: "Yang kami yakini",
@@ -224,7 +225,7 @@ export const ui = {
     briefReady: "Brief siap di bawah.",
     protect: "© {name} — mohon minta izin sebelum menggunakan karya kami.",
     visitNotice:
-      "Kami memakai data kunjungan anonim untuk menampilkan penawaran. Data pribadi baru dikumpulkan saat Anda mengirim formulir.",
+      "Data kunjungan anonim membantu kami menyesuaikan penawaran. Data pribadi baru dikumpulkan saat Anda mengirim formulir.",
     ok: "OK",
     saving: "Menyimpan permintaan Anda…",
     saved: "Tersimpan · nomor referensi Anda {ref}",

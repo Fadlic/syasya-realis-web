@@ -53,6 +53,7 @@ export const ui = {
     filterWork: "Tapis karya",
     archiveSections: "Bahagian arkib",
     scrollHint: "Tatal untuk memutar reel",
+    skipReel: "Langkau ke foto",
     showMore: "Tunjuk lebih banyak foto",
     eyManifesto: "(02) Manifesto",
     believe: "Apa yang kami percaya",
@@ -224,7 +225,7 @@ export const ui = {
     briefReady: "Taklimat sedia di bawah.",
     protect: "© {name} — sila minta izin sebelum menggunakan karya kami.",
     visitNotice:
-      "Kami menggunakan data lawatan tanpa nama untuk memaparkan tawaran. Tiada data peribadi dikumpul sehingga anda menghantar borang.",
+      "Data lawatan tanpa nama membantu kami menyesuaikan tawaran. Tiada data peribadi dikumpul sehingga anda menghantar borang.",
     ok: "OK",
     saving: "Menyimpan pertanyaan anda…",
     saved: "Disimpan · rujukan anda {ref}",

@@ -6,11 +6,15 @@
     s => (s.innerHTML = s.textContent.replace(/^\((\d+)\)/, '<span class="num">($1)</span>'))
   );
   /* footer links */
-  $$("[data-ig2]").forEach(a => (a.href = SITE.instagram));
-  $$("[data-wa2]").forEach(a => (a.href = SITE.whatsapp));
+  const setLink = (a, url) => (url && url !== "#" ? (a.href = url) : (a.style.display = "none"));
+  $$("[data-ig2]").forEach(a => setLink(a, SITE.instagram));
+  $$("[data-wa2]").forEach(a => setLink(a, SITE.whatsapp));
 
   /* active section + progress */
-  const links = $$(".links a.l:not(.page)").filter(a => !a.dataset.nav), // section links only (pages have their own URL)
+  const links = [
+      ...$$(".links a.l:not(.page)").filter(a => !a.dataset.nav), // section links only (pages have their own URL)
+      ...$$('#nav .btn.fill[href*="#contact"]'), // contact has no text link; the CTA marks it so Services is not lit there
+    ],
     secs = links.map(a => document.getElementById(a.getAttribute("href").split("#")[1] || ""));
   const onScroll = () => {
     const h = document.documentElement;
@@ -19,7 +23,11 @@
     secs.forEach((s, i) => {
       if (s && !s.closest("[hidden]") && s.getBoundingClientRect().top < innerHeight * 0.4) cur = i;
     });
-    links.forEach((a, i) => a.classList.toggle("on", i === cur));
+    links.forEach((a, i) => {
+      a.classList.toggle("on", i === cur);
+      if (i === cur) a.setAttribute("aria-current", "location");
+      else a.removeAttribute("aria-current");
+    });
   };
   addEventListener("scroll", onScroll, { passive: true });
   onScroll();
@@ -34,22 +42,15 @@
   };
   const update = () => {
     const t = brief();
-    $("#sendWa").href = SITE.whatsappNumber
-      ? `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(t)}`
-      : "#";
+    // the WhatsApp button is only rendered once a number is set (admin: Contact)
+    if ($("#sendWa")) $("#sendWa").href = `https://wa.me/${SITE.whatsappNumber}?text=${encodeURIComponent(t)}`;
     $("#sendMail").href =
       `mailto:${SITE.email}?subject=${encodeURIComponent("New project — " + (f.company.value || f.name.value || "enquiry"))}&body=${encodeURIComponent(t)}`;
   };
   f.addEventListener("input", update);
   f.addEventListener("change", update);
   update();
-  $("#sendWa").addEventListener("click", e => {
-    if (!SITE.whatsappNumber) {
-      e.preventDefault();
-      $("#outText").textContent = brief();
-      $("#out").classList.add("show");
-    }
-  });
+  // with no number the WhatsApp button is not rendered; "Send via email" and the copyable brief remain
 })();
 
 /* language switcher: close it on Escape or a click outside */

@@ -232,10 +232,16 @@
     const b = document.createElement("button");
     b.type = "button";
     b.textContent = tr("ok", "OK");
-    b.onclick = () => {
+    const dismiss = () => {
       store.set("studio-visit-notice", "1");
-      n.remove();
+      removeEventListener("scroll", onScroll);
+      n.classList.add("out");
+      setTimeout(() => n.remove(), 220);
     };
+    // reading on past the first screen counts as seen, so it never covers the content for long
+    const onScroll = () => scrollY > innerHeight && dismiss();
+    b.onclick = dismiss;
+    addEventListener("scroll", onScroll, { passive: true });
     n.append(t, b);
     document.body.appendChild(n);
   }

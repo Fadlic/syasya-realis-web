@@ -9,6 +9,8 @@ const U = t(lang).home;
 const H = (p) => href(lang, p);
 /* text and archive: published content from the admin panel over the built-in defaults */
 const content = await getContent();
+// contact links render only once an address is set (admin: Contact)
+const IG = content.contact?.instagram || "", WAN = String(content.contact?.whatsapp || "").replace(/\D/g, ""), WA = WAN ? `https://wa.me/${WAN}` : "";
 const T = pageText(content, lang).home;
 /* "Visible" off in the admin = not on the website; "media/…" becomes "/media/…" so it also works under /id/ etc. */
 const rooted = (x) => Object.fromEntries(Object.entries(x).map(([k, v]) => [k, typeof v === "string" && v.startsWith("media/") ? "/" + v : v]));
@@ -58,9 +60,9 @@ const file = (p) => (p || "").split("/").pop();
   <section id="work" style="padding-top:0">
     <div class="eyebrow mono"><span>{U.eyArchive}</span><span>{U.film}</span></div>
     <div class="work-head">
-      <div><h2 class="h2 rv" set:html={heading(T.archiveHeading)} /><p class="lead rv archive-lead" set:html={para(T.archiveIntro)} /></div>
+      <div><h2 class="h2" set:html={heading(T.archiveHeading)} /><p class="lead archive-lead" set:html={para(T.archiveIntro)} /></div>
       <div class="filters" id="filters" role="group" aria-label={U.filterWork}></div>
-      <nav class="arch-jump rv" aria-label={U.archiveSections}><a href="#work" class="on"><span class="mono">01</span>{U.film}</a><a href="#photography"><span class="mono">02</span>{U.stills}</a><a href="#design"><span class="mono">03</span>{U.design}</a></nav>
+      <nav class="arch-jump" aria-label={U.archiveSections}><a href="#work" class="on"><span class="mono">01</span>{U.film}</a><a href="#photography"><span class="mono">02</span>{U.stills}</a><a href="#design"><span class="mono">03</span>{U.design}</a></nav>
     </div>
     <div class="grid" id="grid" hidden></div>
     <div class="proj" id="proj">
@@ -71,7 +73,7 @@ const file = (p) => (p || "").split("/").pop();
         ))}</div>
         <div class="proj-info"><span class="mono" id="projNo">01 / {String(WORK.length).padStart(2, "0")}</span><h3 id="projTitle"></h3><span class="mono" id="projCat"></span></div>
         <div class="proj-bar" aria-hidden="true"><i id="projBar"></i></div>
-        <span class="proj-hint mono">{U.scrollHint}</span>
+        <p class="proj-hint mono"><span>{U.scrollHint}</span><a href="#photography">{U.skipReel} ↓</a></p>
       </div>
     </div>
   </section>
@@ -81,11 +83,11 @@ const file = (p) => (p || "").split("/").pop();
   <section id="photography">
     <div class="eyebrow mono"><span>{U.eyArchive}</span><span>{U.stills}</span></div>
     <div class="work-head">
-      <h2 class="h2 rv" set:html={heading(T.stillsHeading)} />
-      <p class="lead rv" style="max-width:36ch" set:html={para(T.stillsIntro)} />
+      <h2 class="h2" set:html={heading(T.stillsHeading)} />
+      <p class="lead" style="max-width:36ch" set:html={para(T.stillsIntro)} />
     </div>
     <div class="gallery" id="gallery">{PHOTOS.slice(0, PHOTO_STEP).map((p) => (
-      <div class="ph-item rv in" style={`--ar:${p.ar}`}><img alt={p.alt} loading="lazy" decoding="async" src={p.src}></div>
+      <div class="ph-item" style={`--ar:${p.ar}`}><img alt={p.alt} loading="lazy" decoding="async" src={p.src}></div>
     ))}</div>
     <div class="more"><button class="btn" id="moreBtn">{U.showMore}</button></div>
   </section>
@@ -94,18 +96,18 @@ const file = (p) => (p || "").split("/").pop();
   <section id="design" style="padding-top:0">
     <div class="eyebrow mono"><span>{U.eyArchive}</span><span>{U.design}</span></div>
     <div class="work-head">
-      <h2 class="h2 rv" set:html={heading(T.designHeading)} />
-      <p class="lead rv" style="max-width:38ch" set:html={para(T.designIntro)} />
+      <h2 class="h2" set:html={heading(T.designHeading)} />
+      <p class="lead" style="max-width:38ch" set:html={para(T.designIntro)} />
     </div>
     <div class="design-grid" id="designGrid">{DESIGN.map((d) => (
-      <article class={`d-item rv ${d.size || ""}`} tabindex="0"><div class="shot" style={d.ar ? `--ar:${d.ar}` : undefined}><img alt={d.alt || d.title} loading="lazy" decoding="async" src={d.src}></div><div class="item-meta"><h3 style="font-size:17px">{d.title}</h3><span class="mono">{d.cat}</span></div></article>
+      <article class={`d-item ${d.size || ""}`} tabindex="0"><div class="shot" style={d.ar ? `--ar:${d.ar}` : undefined}><img alt={d.alt || d.title} loading="lazy" decoding="async" src={d.src}></div><div class="item-meta"><h3 style="font-size:17px">{d.title}</h3><span class="mono">{d.cat}</span></div></article>
     ))}</div>
   </section>
 
   <!-- MANIFESTO -->
   <section id="manifesto" class="manifesto">
     <div class="eyebrow mono"><span>{U.eyManifesto}</span><span>{U.believe}</span></div>
-    <figure class="mf grade rv" id="grade"><canvas id="gradeRaw" aria-hidden="true"></canvas><canvas id="gradeFin" aria-hidden="true"></canvas><span class="gl l mono">{U.raw}</span><span class="gl r mono">{U.graded}</span><i class="gdiv" aria-hidden="true"></i>
+    <figure class="mf grade" id="grade"><canvas id="gradeRaw" aria-hidden="true"></canvas><canvas id="gradeFin" aria-hidden="true"></canvas><span class="gl l mono">{U.raw}</span><span class="gl r mono">{U.graded}</span><i class="gdiv" aria-hidden="true"></i>
       <blockquote><p set:html={heading(T.manifesto)} /></blockquote>
       <figcaption class="mono"><span data-name>Syasya&Realis</span></figcaption>
     </figure>
@@ -115,8 +117,8 @@ const file = (p) => (p || "").split("/").pop();
   <section id="about">
     <div class="eyebrow mono"><span>{U.eyAbout}</span><span>Syasya Ahmad</span></div>
     <div class="intro">
-      <h2 class="h2 rv" set:html={heading(T.aboutHeading)} />
-      <div class="rv">
+      <h2 class="h2" set:html={heading(T.aboutHeading)} />
+      <div>
         <p class="lead" set:html={para(T.aboutP1)} />
         <p class="lead about-p2" set:html={para(T.aboutP2)} />
         <a class="about-more" href={H("/about")}>{U.moreAbout}</a>
@@ -131,27 +133,27 @@ const file = (p) => (p || "").split("/").pop();
   <!-- SERVICES -->
   <section id="services" style="padding-top:0">
     <div class="eyebrow mono"><span>{U.eyServices}</span><span>{U.disciplinesWord}</span></div>
-    <h2 class="h2 rv" style="margin-bottom:clamp(36px,7vh,72px)" set:html={heading(T.servicesHeading)} />
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)" set:html={heading(T.servicesHeading)} />
     <div class="services">
-      <article class="svc rv">
+      <article class="svc">
         <span class="mono n">01 /</span>
         <svg class="ic" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="11" width="32" height="23" rx="3"/><path d="M14 11l3-5h6l3 5"/><circle cx="20" cy="22" r="6.5"/></svg>
         <h3>{T.services[0].title}</h3>
         <p set:html={para(T.services[0].text)} />
       </article>
-      <article class="svc rv">
+      <article class="svc">
         <span class="mono n">02 /</span>
         <svg class="ic" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="4" y="12" width="23" height="17" rx="3"/><path d="M27 18l9-5v15l-9-5z"/><circle cx="10" cy="7" r="3"/><circle cx="20" cy="7" r="3"/></svg>
         <h3>{T.services[1].title}</h3>
         <p set:html={para(T.services[1].text)} />
       </article>
-      <article class="svc rv">
+      <article class="svc">
         <span class="mono n">03 /</span>
         <svg class="ic" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 30h32M4 22h32M4 14h32"/><rect x="8" y="11" width="10" height="6" rx="1"/><rect x="20" y="19" width="12" height="6" rx="1"/><rect x="11" y="27" width="8" height="6" rx="1"/><path d="M24 6v28"/></svg>
         <h3>{T.services[2].title}</h3>
         <p set:html={para(T.services[2].text)} />
       </article>
-      <article class="svc rv">
+      <article class="svc">
         <span class="mono n">04 /</span>
         <svg class="ic" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 32l4-12L28 4l8 8-16 16z"/><path d="M12 20l8 8"/><circle cx="10" cy="30" r="1.5"/></svg>
         <h3>{T.services[3].title}</h3>
@@ -163,9 +165,9 @@ const file = (p) => (p || "").split("/").pop();
   <!-- PROCESS -->
   <section id="process" style="padding-top:0">
     <div class="eyebrow mono"><span>{U.eyServices}</span><span>{U.process}</span></div>
-    <h2 class="h2 rv" set:html={heading(T.processHeading)} />
+    <h2 class="h2" set:html={heading(T.processHeading)} />
     <div class="steps" style="margin-top:clamp(40px,7vh,80px)">{T.steps.map((st, i) => (
-      <div class="step rv"><span class="mono">{U.step} 0{i + 1}</span><h4>{st.title}</h4><ul class="step-pts">{st.points.map((p) => <li>{p}</li>)}</ul></div>
+      <div class="step"><span class="mono">{U.step} 0{i + 1}</span><h3>{st.title}</h3><ul class="step-pts">{st.points.map((p) => <li>{p}</li>)}</ul></div>
     ))}
     </div>
   </section>
@@ -175,11 +177,11 @@ const file = (p) => (p || "").split("/").pop();
     <div class="eyebrow mono"><span>{U.eyContact}</span><span>{U.startProject}</span></div>
     <div class="contact">
       <div>
-        <p class="big rv" set:html={heading(T.contactHeading)} />
+        <p class="big" set:html={heading(T.contactHeading)} />
         <div class="reach">
           <button id="copyMail"><span class="ci"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5 12 13l8.5-5.5"/></svg></span><span class="lbl"><small>{U.email}</small><span data-email>hello@studio.com</span></span></span><span class="mono ink-3" id="copyHint">{U.copy}</span></button>
-          <a href="#" data-ig target="_blank" rel="noopener" aria-label={U.instagramAria}><span class="ci"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></span><span class="lbl"><small>{U.instagram}</small><span>{U.instagramLine}</span></span></span><span class="arr">↗</span></a>
-          <a href="#" data-wa target="_blank" rel="noopener" aria-label={U.whatsappAria}><span class="ci"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.7a8.6 8.6 0 0 1-12.7 7.6L3.5 20.5l1.3-4.1a8.6 8.6 0 1 1 15.7-4.7z"/><path d="M9.2 7.9c-.4 0-.9.5-.9 1.3 0 2.6 3.5 6.3 6.6 6.3.8 0 1.3-.6 1.3-1 0-.3-.1-.5-.4-.6l-1.6-.8c-.3-.1-.5 0-.7.2l-.5.6c-1-.4-2.2-1.6-2.6-2.6l.6-.5c.2-.2.3-.4.2-.7l-.7-1.7c-.1-.3-.4-.5-.7-.5z" fill="currentColor" stroke="none"/></svg></span><span class="lbl"><small>{U.whatsapp}</small><span>{U.whatsappLine}</span></span></span><span class="arr">↗</span></a>
+          {IG && <a href={IG} data-ig target="_blank" rel="noopener" aria-label={U.instagramAria}><span class="ci"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg></span><span class="lbl"><small>{U.instagram}</small><span>{U.instagramLine}</span></span></span><span class="arr">↗</span></a>}
+          {WA && <a href={WA} data-wa target="_blank" rel="noopener" aria-label={U.whatsappAria}><span class="ci"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.7a8.6 8.6 0 0 1-12.7 7.6L3.5 20.5l1.3-4.1a8.6 8.6 0 1 1 15.7-4.7z"/><path d="M9.2 7.9c-.4 0-.9.5-.9 1.3 0 2.6 3.5 6.3 6.6 6.3.8 0 1.3-.6 1.3-1 0-.3-.1-.5-.4-.6l-1.6-.8c-.3-.1-.5 0-.7.2l-.5.6c-1-.4-2.2-1.6-2.6-2.6l.6-.5c.2-.2.3-.4.2-.7l-.7-1.7c-.1-.3-.4-.5-.7-.5z" fill="currentColor" stroke="none"/></svg></span><span class="lbl"><small>{U.whatsapp}</small><span>{U.whatsappLine}</span></span></span><span class="arr">↗</span></a>}
         </div>
       </div>
       <form id="brief" novalidate>
@@ -208,8 +210,8 @@ const file = (p) => (p || "").split("/").pop();
         <div class="form-foot">
                     <span class="mono ink-3 v2-only">{U.filledIn}</span>
           <div class="send-row v2-only">
-            <a class="btn wa" id="sendWa" href="#" target="_blank" rel="noopener">{U.sendWa}
-              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
+            {WA && <a class="btn wa" id="sendWa" href={WA} target="_blank" rel="noopener">{U.sendWa}
+              <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>}
             <a class="btn" id="sendMail" href="#">{U.sendMail}
               <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
           </div>

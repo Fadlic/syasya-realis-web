@@ -12,11 +12,11 @@ const F = pageText(await getContent(), lang).faq;
 <main id="faq">
   <section class="ab-hero">
     <div class="eyebrow mono"><span>(FAQ) <span data-name>Syasya&Realis</span></span><span>{U.eyebrow}</span></div>
-    <h1 class="rv" set:html={heading(F.headline)} />
-    <p class="lead rv" set:html={para(F.lead)} />
+    <h1 set:html={heading(F.headline)} />
+    <p class="lead" set:html={para(F.lead)} />
   </section>
   <section style="padding-top:0">
-    <div class="faq-page rv">
+    <div class="faq-page">
       <div class="qa">
       {F.items.map((it) => (
         <details><summary>{it.q}<i aria-hidden="true">+</i></summary><div class="ans">{it.a}</div></details>
@@ -26,7 +26,7 @@ const F = pageText(await getContent(), lang).faq;
   </section>
   <section style="padding-top:0">
     <div class="ab-cta">
-      <p class="rv" set:html={U.cta} />
+      <p set:html={U.cta} />
       <a class="btn fill" href={H("/#contact")}>{U.ask}
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
     </div>

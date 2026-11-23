@@ -68,8 +68,10 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
   /* apply settings */
   $$("[data-name]").forEach(e => (e.textContent = SITE.name));
   $$("[data-email]").forEach(e => (e.textContent = SITE.email));
-  $$("[data-ig]").forEach(a => (a.href = SITE.instagram));
-  $$("[data-wa]").forEach(a => (a.href = SITE.whatsapp));
+  // a link with no address set yet is hidden, never left pointing at "#"
+  const setLink = (a, url) => (url && url !== "#" ? (a.href = url) : (a.style.display = "none"));
+  $$("[data-ig]").forEach(a => setLink(a, SITE.instagram));
+  $$("[data-wa]").forEach(a => setLink(a, SITE.whatsapp));
   $("#yr").textContent = new Date().getFullYear();
 
   /* placeholder helper: shows a tinted tile with the file name until the file exists */
@@ -132,7 +134,7 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
     const grid = $("#grid");
     WORK.forEach((w, i) => {
       const a = document.createElement("article");
-      a.className = `item rv ${w.size}`;
+      a.className = `item ${w.size}`;
       a.dataset.cat = w.cat;
       a.tabIndex = 0;
       const shot = document.createElement("div");
@@ -289,7 +291,7 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
       PHOTOS.slice(shown, shown + STEP).forEach((p, k) => {
         const i = shown + k,
           d = document.createElement("div");
-        d.className = "ph-item rv in";
+        d.className = "ph-item";
         d.style.setProperty("--ar", p.ar);
         const im = img(p.src, p.src.split("/").pop(), i, p.alt || `Photograph ${i + 1}`);
         im.onerror = () => im.replaceWith(photoPh(p, i));
@@ -315,17 +317,6 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
       };
     });
   } /* end home page only */
-
-  /* counters */
-  const countUp = (el, n) => {
-    let k = 0;
-    const step = () => {
-      k++;
-      el.textContent = Math.min(n, Math.round((n * k) / 30));
-      if (k < 30) requestAnimationFrame(step);
-    };
-    step();
-  };
 
   /* lightbox — "screening room": theme gradient backdrop, counter, viewfinder frame, filmstrip */
   const lb = $("#lb"),
@@ -535,25 +526,12 @@ ${f.msg.value || ""}`;
     el.style.fontSize = ((100 * document.documentElement.clientWidth) / w) * 0.96 + "px";
   };
 
-  /* reveal on scroll */
-  const io = new IntersectionObserver(
-    es =>
-      es.forEach(en => {
-        if (!en.isIntersecting) return;
-        en.target.classList.add("in");
-        io.unobserve(en.target);
-        if (en.target.querySelector?.("[data-count-work]")) {
-          countUp($("[data-count-work]"), WORK.length);
-          countUp($("[data-count-photo]"), PHOTOS.length);
-          countUp($("[data-count-design]"), DESIGN.length);
-        }
-      }),
-    { threshold: 0.12 }
-  );
-  $$(".rv").forEach((el, i) => {
-    el.style.transitionDelay = (i % 4) * 70 + "ms";
-    io.observe(el);
-  });
+  /* archive counts: shown as final numbers at rest (no scroll-triggered motion) */
+  [
+    ["[data-count-work]", WORK],
+    ["[data-count-photo]", PHOTOS],
+    ["[data-count-design]", DESIGN],
+  ].forEach(([sel, list]) => $(sel) && ($(sel).textContent = list.length));
 
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
     fitWM();
