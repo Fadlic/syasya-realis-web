@@ -5826,3 +5826,9 @@ body.v2 textarea:focus-visible {
 .f input[aria-invalid="true"] {
   border-color: var(--rose-t);
 }
+/* pop-up close: 44px hit area around the 38px button */
+.pcard .x::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+}

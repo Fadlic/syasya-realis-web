@@ -331,7 +331,8 @@
     $("#c-brief").textContent = B.filter(b => b.start > TODAY).length;
     $("#k3").textContent = LIVE() ? H("avgReply") || "—" : "1 h 40 m";
     $("#k4").textContent = E.filter(e => e.status === "Won").length;
-    $("#k4s").textContent = `${E.filter(e => e.status === "Quoted").length} quote(s) waiting`;
+    const quoted = E.filter(e => e.status === "Quoted").length;
+    $("#k4s").textContent = `${quoted} ${quoted === 1 ? "quote" : "quotes"} waiting`;
     const attn = E.filter(e => e.status === "New" || e.status === "Brief done");
     $("#attn").replaceChildren(
       ...attn

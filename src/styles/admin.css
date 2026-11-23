@@ -2215,3 +2215,51 @@ button.cm-file:hover {
     overflow-x: auto;
   }
 }
+
+/* polish: phone tab bar scrolls without a native scrollbar */
+@media (max-width: 820px) {
+  .side {
+    scrollbar-width: none;
+  }
+  .side::-webkit-scrollbar {
+    display: none;
+  }
+  /* KPI labels may wrap to two lines; reserve both so the numbers line up across a row */
+  .kpi > span:first-child {
+    display: block;
+    min-height: 2lh;
+  }
+}
+/* touch screens: compact buttons still get a 44px target */
+@media (pointer: coarse) {
+  .btn.sm {
+    min-height: 44px;
+  }
+}
+
+/* polish: functional labels never below 11px; axis labels in the readable muted tone */
+.soon,
+.cm-file .th,
+.cm-file .ty,
+.cm-row .th {
+  font-size: 11px;
+}
+.times span,
+.cols .gl span,
+.xl span {
+  font-size: 11px;
+  color: var(--ink-3);
+}
+/* sub-tabs that outgrow a phone scroll sideways inside their own pill */
+.seg {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.seg::-webkit-scrollbar {
+  display: none;
+}
+.seg button {
+  flex: none;
+  white-space: nowrap;
+}
