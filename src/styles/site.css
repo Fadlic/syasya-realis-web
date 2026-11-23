@@ -5416,36 +5416,36 @@ body.ref .app .ph-wrap {
   }
 }
 
-/* scroll scatter (public/js/09-scatter.js) */
-.sc-w {
-  display: inline-block;
-  white-space: nowrap;
+/* ===== scroll reveal + smooth section navigation (public/js/09-reveal.js) =====
+   Content fades up softly the first time it enters the screen; the classes are removed once it has
+   arrived, so hover transitions are untouched. Section links land below the fixed nav. */
+html {
+  scroll-padding-top: 76px;
 }
-.sc-l {
-  display: inline-block;
+/* sections focused by a nav link (for screen readers) show no ring */
+main section[tabindex="-1"]:focus {
+  outline: none;
 }
-main > section,
-footer {
-  overflow-x: clip;
+.rv {
+  opacity: 0;
+  translate: 0 18px;
+  transition:
+    opacity 0.7s var(--ease-out) var(--rv-d, 0s),
+    translate 0.9s var(--ease-out) var(--rv-d, 0s);
+}
+.rv.rv-in {
+  opacity: 1;
+  translate: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .sc-l,
-  #gallery .ph-item,
-  #designGrid .d-item,
-  #services .svc,
-  #process .step,
-  #about .facts > div,
-  #contact .reach > *,
-  footer .fgrid > div,
-  #manifesto .mf {
-    translate: none !important;
-    rotate: none !important;
-    scale: none !important;
-    opacity: 1 !important;
+  html {
+    scroll-behavior: auto;
   }
-}
-.hero h1.sc-loose .ln {
-  overflow: visible;
+  .rv {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
 }
 
 /* ===== pop-up card motion =====
