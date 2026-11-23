@@ -18,13 +18,21 @@
     secs = links.map(a => document.getElementById(a.getAttribute("href").split("#")[1] || ""));
   const progress = $("#progress"),
     nav = $("#nav");
-  let queued = false;
+  let queued = false,
+    lastY = scrollY;
   // progress bar, solid header and active section: one pass per frame
   const render = () => {
     queued = false;
     const h = document.documentElement;
     progress.style.transform = `scaleX(${h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)})`;
     nav.classList.toggle("solid", scrollY > 40);
+    // tuck the header away while reading down, bring it back on any upward scroll
+    const y = scrollY,
+      dy = y - lastY;
+    if (y < 160 || document.body.classList.contains("menu") || nav.contains(document.activeElement)) nav.classList.remove("tuck");
+    else if (dy > 6) nav.classList.add("tuck");
+    else if (dy < -6) nav.classList.remove("tuck");
+    if (Math.abs(dy) > 6) lastY = y;
     let cur = -1;
     secs.forEach((s, i) => {
       if (s && !s.closest("[hidden]") && s.getBoundingClientRect().top < innerHeight * 0.4) cur = i;
@@ -41,6 +49,7 @@
     requestAnimationFrame(render);
   };
   addEventListener("scroll", onScroll, { passive: true });
+  nav.addEventListener("focusin", () => nav.classList.remove("tuck")); // keyboard users always see the menu
   render();
 
   /* send via WhatsApp / email with the brief pre-filled (home page only) */

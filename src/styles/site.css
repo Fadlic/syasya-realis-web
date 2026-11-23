@@ -5649,3 +5649,52 @@ main section[tabindex="-1"]:focus {
     opacity: 1;
   }
 }
+
+/* the header tucks away while reading down and returns on any upward scroll (02-site.js) */
+.nav {
+  transition:
+    background 0.4s,
+    border-color 0.4s,
+    padding 0.4s,
+    translate 0.45s var(--ease-out);
+}
+.nav.tuck {
+  translate: 0 -100%;
+  transition-timing-function: ease, ease, ease, var(--ease-in-out);
+}
+
+/* page to page: the header stays put while the page underneath cross-fades and settles */
+@view-transition {
+  navigation: auto;
+}
+.nav {
+  view-transition-name: site-nav;
+}
+.progress {
+  view-transition-name: site-progress;
+}
+::view-transition-old(root) {
+  animation: vtOut 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: vtIn 0.5s var(--ease-out) 0.06s both;
+}
+@keyframes vtOut {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vtIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+  .nav.tuck {
+    translate: none;
+  }
+}

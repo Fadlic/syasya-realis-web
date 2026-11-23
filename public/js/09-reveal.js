@@ -1,10 +1,11 @@
-/* ===== Scroll reveal + smooth section navigation =====
+/* ===== Scroll reveal, smooth section navigation, inertial wheel scrolling =====
    1) Content fades up softly the first time it enters the screen (once; never again on the way back).
       Items that arrive together follow each other by a few frames. Once arrived, the classes are removed
       so the element is exactly as before (hover transitions included).
    2) Links to a section of this page glide there on an eased curve and land below the fixed nav.
       A wheel, touch or key during the glide hands control straight back to the visitor.
-   Reduced motion: nothing is hidden and links jump instantly. */
+   3) On desktop the mouse wheel eases the page toward its target instead of stepping.
+   Reduced motion: nothing is hidden, links jump instantly and the wheel scrolls natively. */
 (() => {
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const $$ = s => [...document.querySelectorAll(s)];
@@ -91,6 +92,66 @@
     };
     raf = requestAnimationFrame(step);
   };
+
+  /* ---------- 3. inertial wheel scrolling (mouse and trackpad on desktop only) ----------
+     The wheel sets a target; the page eases toward it a little each frame, so scrolling flows instead of
+     stepping. Anything else that scrolls (keys, scrollbar, the section glide, a locked page, an inner
+     scroll box, pinch-zoom) is left to the browser and simply re-syncs the target. */
+  if (!reduce && matchMedia("(pointer: fine)").matches) {
+    let target = scrollY,
+      cur = scrollY,
+      written = -1,
+      running = false,
+      last = 0;
+    const max = () => html.scrollHeight - innerHeight;
+    const locked = () =>
+      document.body.classList.contains("intro-on") ||
+      getComputedStyle(document.body).overflowY === "hidden" ||
+      getComputedStyle(html).overflowY === "hidden";
+    const scrollsInside = el => {
+      for (; el && el !== document.body && el !== html; el = el.parentElement) {
+        const o = getComputedStyle(el).overflowY;
+        if ((o === "auto" || o === "scroll") && el.scrollHeight > el.clientHeight) return true;
+      }
+      return false;
+    };
+    const halt = () => {
+      running = false;
+      html.style.scrollBehavior = "";
+    };
+    const frame = now => {
+      if (!running) return;
+      if (written >= 0 && Math.abs(scrollY - written) > 2) return halt(); // something else moved the page
+      const dt = Math.min(64, now - (last || now - 16.7));
+      last = now;
+      cur += (target - cur) * (1 - Math.pow(1 - 0.1, dt / 16.7));
+      if (Math.abs(target - cur) < 0.5) cur = target;
+      scrollTo(0, cur);
+      written = scrollY;
+      if (cur === target) return halt();
+      requestAnimationFrame(frame);
+    };
+    addEventListener(
+      "wheel",
+      e => {
+        if (e.ctrlKey || e.defaultPrevented || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        if (locked() || scrollsInside(e.target)) return;
+        e.preventDefault();
+        stop && stop(); // a wheel turn takes over from a section glide
+        if (!running) target = cur = scrollY;
+        const k = e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? innerHeight : 1;
+        target = Math.max(0, Math.min(max(), target + e.deltaY * k));
+        if (!running) {
+          running = true;
+          written = -1;
+          last = 0;
+          html.style.scrollBehavior = "auto";
+          requestAnimationFrame(frame);
+        }
+      },
+      { passive: false }
+    );
+  }
 
   document.addEventListener("click", e => {
     const a = e.target.closest("a[href*='#']");
