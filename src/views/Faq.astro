@@ -1,0 +1,35 @@
+---
+/* FAQ page body, shared by /faq and /<lang>/faq */
+import Base from "../layouts/Base.astro";
+import { getContent, pageText, heading, para } from "../lib/content.mjs";
+import { t, href } from "../i18n/index.mjs";
+const { lang = "en" } = Astro.props;
+const U = t(lang).faq;
+const H = (p) => href(lang, p);
+const F = pageText(await getContent(), lang).faq;
+---
+<Base page="faq" lang={lang}>
+<main id="faq">
+  <section class="ab-hero">
+    <div class="eyebrow mono"><span>(FAQ) <span data-name>Syasya&Realis</span></span><span>{U.eyebrow}</span></div>
+    <h1 set:html={heading(F.headline)} />
+    <p class="lead" set:html={para(F.lead)} />
+  </section>
+  <section style="padding-top:0">
+    <div class="faq-page">
+      <div class="qa">
+      {F.items.map((it) => (
+        <details><summary>{it.q}<i aria-hidden="true">+</i></summary><div class="ans">{it.a}</div></details>
+      ))}
+    </div>
+    </div>
+  </section>
+  <section style="padding-top:0">
+    <div class="ab-cta">
+      <p set:html={U.cta} />
+      <a class="btn fill" href={H("/#contact")}>{U.ask}
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
+    </div>
+  </section>
+</main>
+</Base>

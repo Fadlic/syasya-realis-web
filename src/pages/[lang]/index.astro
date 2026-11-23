@@ -1,0 +1,8 @@
+---
+/* /id/ and /ms/ — the home page in the other languages */
+import Home from "../../views/Home.astro";
+import { OTHER_LANGS } from "../../i18n/index.mjs";
+export const getStaticPaths = () => OTHER_LANGS.map((lang) => ({ params: { lang } }));
+const { lang } = Astro.params;
+---
+<Home lang={lang} />

@@ -1,0 +1,28 @@
+{
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "alpha-value-notation": null,
+    "selector-id-pattern": null,
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "media-feature-range-notation": null,
+    "comment-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "at-rule-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "value-keyword-case": null,
+    "property-no-vendor-prefix": null,
+    "font-family-name-quotes": null,
+    "custom-property-empty-line-before": null,
+    "keyframes-name-pattern": null,
+    "no-duplicate-selectors": [
+      true,
+      {
+        "severity": "warning",
+        "message": "Duplicate selector (known debt: legacy theme layers v2/ref/sr \u2014 merge with a screenshot check)"
+      }
+    ]
+  }
+}

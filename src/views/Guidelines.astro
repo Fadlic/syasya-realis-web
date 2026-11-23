@@ -1,0 +1,77 @@
+---
+/* Brand guidelines body. The guidelines are kept in English (logo rules for partners and
+   printers); /<lang>/guidelines shows them with the menu and footer in that language. */
+import Base from "../layouts/Base.astro";
+import { t, href } from "../i18n/index.mjs";
+const { lang = "en" } = Astro.props;
+const note = lang === "en" ? "" : t(lang).guidelines.englishOnly;
+---
+<Base page="guidelines" lang={lang}>
+<main id="brand-guidelines" class="idp" lang={lang === "en" ? undefined : "en"}>
+  {note && <p class="lang-note mono" lang={lang}>{note}</p>}
+  <section class="ab-hero">
+    <div class="eyebrow mono"><span>(Brand) <span data-name>Syasya&Realis</span></span><span>Identity guidelines · 2026</span></div>
+    <h1>Brand <span class="serif">guidelines.</span></h1>
+    <p class="lead">How the S&amp;R mark is used — versions, space, colour, type and applications. <em class="hl">For partners, printers and press.</em></p>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>(01) Logo system</span><span>Three essential versions</span></div>
+    <div class="idg">
+      <figure class="idt c"><i class="srm dark" aria-hidden="true"></i><figcaption class="mono">01 / Primary · black mark · cream</figcaption></figure>
+      <figure class="idt k"><i class="srm light" aria-hidden="true"></i><figcaption class="mono">02 / Reverse · white mark · black</figcaption></figure>
+      <figure class="idt r"><i class="srm mono" aria-hidden="true"></i><figcaption class="mono">03 / Accent · white mark · red</figcaption></figure>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>(02) Form &amp; space</span><span>Logo construction</span></div>
+    <div class="cons">
+      <figure class="cons-mark" aria-label="Clear space around the monogram"><div class="cs"><i class="srm dark" aria-hidden="true"></i><span class="x a">×</span><span class="x b">×</span><span class="x c">×</span><span class="x d">×</span></div></figure>
+      <div class="cons-copy">
+        <article><span class="mono">Construction study</span><p>The wide flowing S and structured R share an interlocking centre. The ampersand-like loop creates the visual connection.</p></article>
+        <article><span class="mono">Clear space</span><p>Keep text and other images clear of the mark. Use at least the diamond width as a preliminary guide around the artwork.</p></article>
+        <article class="note"><span class="mono">Production note</span><p>These guides are illustrative. Exact proportions and minimum sizes should be tested using the final vector artwork.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>(03) Palette</span><span>Tap a colour to copy</span></div>
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)">Three colours. <span class="serif">One signature.</span></h2>
+    <div class="ci-pal">
+      <button data-hex="#000000" style="--c:#000000;--t:#F8F5EF"><b>Raven Black</b><span class="mono">#000000</span><em>Authority · confidence · contrast</em></button>
+      <button data-hex="#F8F5EF" style="--c:#F8F5EF;--t:#000000"><b>Editorial Cream</b><span class="mono">#F8F5EF</span><em>Refinement · space · calm</em></button>
+      <button data-hex="#D0021B" style="--c:#D0021B;--t:#ffffff"><b>Signature Red</b><span class="mono">#D0021B</span><em>Passion · detail · focus</em></button>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>(04) Typography</span><span>The Bodoni family</span></div>
+    <div class="ci-type">
+      <article><span class="aa moda">Aa</span><div><h3>Bodoni Moda</h3><p>Masthead, display headlines and editorial statements.</p><p class="abc moda">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz</p></div></article>
+      <article><span class="aa moda it">Aa</span><div><h3>Bodoni</h3><p>Secondary titles, bylines and supporting copy.</p><p class="abc moda it">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz</p></div></article>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>(05) Applications</span><span>Concept mockups</span></div>
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)">Identity, <span class="serif">in hand.</span></h2>
+    <div class="apps">
+      <article class="app"><div class="ph-wrap"><img src="/brand/mockup-1.webp" alt="Cream and black business cards with the S&amp;R monogram and red edges" loading="lazy"></div>
+        <span class="mono">01 / Business cards · cream &amp; black</span><h3>The name card</h3>
+        <p>Warm textured stock, elegant Bodoni letterforms and a red detail that becomes the studio’s signature.</p>
+        <dl><div><dt>Format</dt><dd>90 × 54 mm</dd></div><div><dt>Finish</dt><dd>Matte, uncoated</dd></div><div><dt>Edges</dt><dd>Crimson red</dd></div></dl></article>
+      <article class="app"><div class="ph-wrap"><img src="/brand/mockup-2.webp" alt="Cream and red product tags with red cord, and a cream envelope with the monogram" loading="lazy"></div>
+        <span class="mono">02 / Product tags · letterhead &amp; envelope</span><h3>Tagging &amp; stationery</h3>
+        <p>Realistic paper textures, red cord attachments and fine-detail print applications.</p></article>
+      <article class="app"><div class="ph-wrap"><img src="/brand/mockup-3.webp" alt="Black-framed cream lightbox blade sign with the monogram on a stone wall" loading="lazy"></div>
+        <span class="mono">03 / Exterior blade signage · illuminated</span><h3>A quiet mark. A strong presence.</h3>
+        <p>A black-framed cream lightbox brings the studio identity into a physical space. Warm illumination preserves contrast after dark.</p>
+        <dl><div><dt>Material</dt><dd>Powder-coated metal</dd></div><div><dt>Face</dt><dd>Diffused acrylic</dd></div><div><dt>Light</dt><dd>Warm white</dd></div></dl></article>
+    </div>
+    <p class="mono ci-disc">Photorealistic concept mockups; print specifications are recommendations, not production measurements.</p>
+    <a class="btn id-next" href={href(lang, "/about")}>← The story behind the mark</a>
+  </section>
+</main>
+</Base>

@@ -1,0 +1,7 @@
+---
+import Faq from "../../views/Faq.astro";
+import { OTHER_LANGS } from "../../i18n/index.mjs";
+export const getStaticPaths = () => OTHER_LANGS.map((lang) => ({ params: { lang } }));
+const { lang } = Astro.params;
+---
+<Faq lang={lang} />

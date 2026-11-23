@@ -1,0 +1,51 @@
+---
+import { t, href } from "../i18n/index.mjs";
+import { getContent } from "../lib/content.mjs";
+const { lang = "en" } = Astro.props;
+const { footer: F, nav: N, lightbox: LB, popup: PO } = t(lang);
+const H = (p) => href(lang, p);
+// contact links render only once an address is set (admin: Contact)
+const content = await getContent();
+const IG = content.contact?.instagram || "", WAN = String(content.contact?.whatsapp || "").replace(/\D/g, ""), WA = WAN ? `https://wa.me/${WAN}` : "";
+---
+<footer>
+  <div class="fgrid v2-only">
+    <div><div class="fb"><i class="srm light mk" aria-hidden="true"></i><span data-name>Syasya&amp;Realis</span></div><p style="max-width:28ch">{F.tagline}</p>
+      <a class="btn fill" href={H("/#contact")} style="display:inline-flex;margin-top:18px">{N.start}
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a></div>
+    <div><h2 class="fh">{F.disciplines}</h2><a href={H("/#services")}>{F.links.photo}</a><a href={H("/#services")}>{F.links.video}</a><a href={H("/#services")}>{F.links.montage}</a><a href={H("/#services")}>{F.links.design}</a></div>
+    <div><h2 class="fh">{F.studio}</h2><a href={H("/about")}>{F.links.about}</a><a href={H("/#work")}>{F.links.archive}</a><a href={H("/#manifesto")}>{F.links.manifesto}</a><a href={H("/guidelines")}>{F.links.guidelines}</a><a href={H("/faq")}>{F.links.faq}</a></div>
+    <div class="fcontact"><h2 class="fh">{F.contact}</h2><a href={H("/#contact")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7.5 12 13l8.5-5.5"/></svg><span data-email>hello@studio.com</span></a>{IG && <a href={IG} data-ig2 target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg><span>Instagram</span></a>}{WA && <a href={WA} data-wa2 target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.7a8.6 8.6 0 0 1-12.7 7.6L3.5 20.5l1.3-4.1a8.6 8.6 0 1 1 15.7-4.7z"/><path d="M9.2 7.9c-.4 0-.9.5-.9 1.3 0 2.6 3.5 6.3 6.6 6.3.8 0 1.3-.6 1.3-1 0-.3-.1-.5-.4-.6l-1.6-.8c-.3-.1-.5 0-.7.2l-.5.6c-1-.4-2.2-1.6-2.6-2.6l.6-.5c.2-.2.3-.4.2-.7l-.7-1.7c-.1-.3-.4-.5-.7-.5z" fill="currentColor" stroke="none"/></svg><span>WhatsApp</span></a>}</div>
+  </div>
+  <div class="wm" id="wm" aria-hidden="true"><span data-name>Syasya&amp;Realis</span></div>
+  <div class="foot mono">
+    <span class="copy-line"><span>© <span id="yr"></span> <span data-name>Syasya&amp;Realis</span>. {F.rights}</span><span>{F.reuse}</span><span class="credit">Website © 2026 John's Tech &amp; Co</span></span>
+    <span>{F.line}</span>
+    <a href="#top">{F.top}</a>
+  </div>
+</footer>
+
+<!-- lightbox -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label={LB.label}>
+  <div class="lb-amb" aria-hidden="true"></div>
+  <div class="lb-top">
+    <div class="lb-cap"><span class="mono lb-eye" id="lbEye"></span><span class="lb-ttl" id="lbTitle"></span></div>
+    <div class="lb-side"><span class="mono lb-count" id="lbCount"></span><button class="x" id="lbClose" aria-label={LB.close}>✕</button></div>
+  </div>
+  <div class="lb-stage" id="lbStage"></div>
+  <div class="lb-foot"><div class="lb-strip" id="lbStrip" aria-label={LB.all}></div><span class="mono lb-keys">{LB.keys}</span></div>
+</div>
+
+<!-- ===== pop-up offer: content arrives from the admin board ===== -->
+<div class="po" id="po" aria-hidden="true">
+  <div class="pcard" role="dialog" aria-modal="true" aria-labelledby="po-h" aria-describedby="po-m">
+    <button class="x" id="po-x" aria-label={PO.close}>✕</button>
+    <div class="po-eye" id="po-eye"></div>
+    <div class="po-big" id="po-big"></div>
+    <h3 id="po-h"></h3>
+    <p id="po-m"></p>
+    <button class="code" id="po-code" type="button" aria-label={PO.copyCode}><span>{PO.codeHint}</span><b id="po-codev"></b></button>
+    <button class="cta" id="po-cta" type="button"></button>
+    <div class="fine" id="po-fine"></div>
+  </div>
+</div>

@@ -1,0 +1,407 @@
+---
+/* Admin board (/admin): enquiries, briefs, content, pop-ups, reports, settings, security.
+   Not linked from the website and not indexed (robots.txt + noindex + X-Robots-Tag).
+   Scripts are files (public/admin/*.js) so the page passes the Content-Security-Policy;
+   the Supabase client comes from our own bundle (src/scripts/supabase-loader.ts), never a CDN.
+   Without a Supabase URL + key in /js/config.js the board opens in demo mode with sample data. */
+import "@fontsource-variable/montserrat";   /* same face as the website (audit M5) */
+import "@fontsource-variable/libre-bodoni";
+import "@fontsource-variable/libre-bodoni/wght-italic.css";
+import "@fontsource-variable/geist-mono";
+import "../../styles/admin.css";
+import { DEFAULTS, PAGE_FIELDS, LANGS } from "../../data/content.mjs";
+import { jsonForScript } from "../../lib/content.mjs";
+/* built-in website content: what the Content panel starts from while nothing is saved */
+const contentJson = jsonForScript({ defaults: DEFAULTS, fields: PAGE_FIELDS, langs: LANGS });
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<!-- website and admin: John's Tech & Co -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Syasya&amp;Realis — Admin</title>
+<link rel="icon" type="image/png" href="/brand/favicon.png">
+<link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+<script>import "../../scripts/supabase-loader.ts";</script>
+<script is:inline defer src="/admin/board.js"></script>
+<script is:inline defer src="/admin/content.js"></script>
+<script is:inline defer src="/js/config.js"></script>
+<script is:inline defer src="/admin/live.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="shell">
+  <aside class="side" aria-label="Admin navigation">
+    <div class="brand"><i aria-hidden="true"></i><span>Syasya&amp;Realis</span><small>ADMIN</small></div>
+    <div class="grp">Work</div>
+    <button class="nav-b" data-v="dash" aria-current="page"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="11" y="3" width="6" height="6" rx="1.5"/><rect x="3" y="11" width="6" height="6" rx="1.5"/><rect x="11" y="11" width="6" height="6" rx="1.5"/></svg>Dashboard</span></button>
+    <button class="nav-b" data-v="inbox"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 11l2.5-7h9L17 11v5H3z"/><path d="M3 11h4l1 2h4l1-2h4"/></svg>Enquiries</span><span class="count" id="c-new">0</span></button>
+    <button class="nav-b" data-v="cal"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/></svg>Brief schedule</span><span class="count quiet" id="c-brief">0</span></button>
+    <button class="nav-b" data-v="content"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 13l4-4 3 3 2-2 5 5"/><circle cx="13" cy="7" r="1.4"/></svg>Content</span></button>
+    <button class="nav-b" data-v="pop"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 8.5v3l9 4.5v-12z"/><path d="M12 6.5c2 0 4 1.5 4 3.5s-2 3.5-4 3.5"/><path d="M5.5 12.5l1 4h2l-1-3.2"/></svg>Pop-ups</span><span class="count quiet" id="c-live">0</span></button>
+    <button class="nav-b" data-v="rep"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-5"/></svg>Reports</span></button>
+    <div class="grp">Setup</div>
+    <button class="nav-b" data-v="set"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="2.5"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/></svg>Settings</span></button>
+    <button class="nav-b" data-v="sys"><span class="l"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M10 2.5l6 2.5v4.5c0 4-2.6 6.6-6 8-3.4-1.4-6-4-6-8V5z"/><path d="M7.5 10l2 2 3.5-3.5"/></svg>Security</span><span class="count quiet" id="c-online">0</span></button>
+    <div class="me"><span class="av" aria-hidden="true">AD</span><div><div>Admin</div><div class="hint">Owner · 2FA on</div></div></div>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <label class="search"><span class="sr">Search enquiries</span>
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="M14 14l4 4"/></svg>
+        <input id="q" type="search" placeholder="Search name, company or reference…"></label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span class="flag" id="mode-flag">Demo mode · sample data · not connected</span>
+        <button class="btn sm" id="add-enq">+ Add enquiry</button>
+        <button class="btn fill sm" id="new-brief">+ Schedule brief</button>
+      </div>
+    </div>
+
+    <main id="main" tabindex="-1">
+      <!-- ========== DASHBOARD ========== -->
+      <section class="view" id="v-dash" aria-labelledby="h-dash">
+        <div class="head"><div><span class="mono muted" id="today-l"></span><h1 id="h-dash">Good morning, <span class="serif">Admin.</span></h1></div></div>
+        <div class="kpis">
+          <div class="kpi"><span class="mono muted">New enquiries</span><b id="k1">0</b><small>Waiting for first reply</small></div>
+          <div class="kpi"><span class="mono muted">Briefs this week</span><b id="k2">0</b><small id="k2s">—</small></div>
+          <div class="kpi"><span class="mono muted">Avg first reply</span><b id="k3">—</b><small>Target: under 2 hours</small></div>
+          <div class="kpi"><span class="mono muted">Won this month</span><b id="k4">0</b><small id="k4s">—</small></div>
+        </div>
+        <div class="grid2">
+          <div class="card"><div class="card-h"><h2>Needs attention</h2><button class="btn sm" data-go="inbox">Open inbox →</button></div><div id="attn"></div></div>
+          <div class="card"><div class="card-h"><h2>Upcoming briefs</h2><button class="btn sm" data-go="cal">Calendar →</button></div><div class="up" id="up-dash"></div></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-h"><h2>Pipeline</h2><span class="hint">Every open enquiry by stage</span></div><div class="bars" id="pipe-dash"></div></div>
+      </section>
+
+      <!-- ========== ENQUIRIES ========== -->
+      <section class="view" id="v-inbox" aria-labelledby="h-inbox" hidden>
+        <div class="head"><div><span class="mono muted">Booking handler</span><h1 id="h-inbox">Enquiries</h1></div>
+          <div class="seg" role="group" aria-label="Filter enquiries" id="f-seg"></div></div>
+        <div class="inbox">
+          <div class="list" id="list" role="list"></div>
+          <div class="card detail" id="detail" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- ========== BRIEF SCHEDULE ========== -->
+      <section class="view" id="v-cal" aria-labelledby="h-cal" hidden>
+        <div class="head"><div><span class="mono muted">Structured briefs</span><h1 id="h-cal">Brief schedule</h1></div>
+          <div style="display:flex;gap:8px;align-items:center"><button class="btn sm" id="wk-prev" aria-label="Previous week">←</button>
+            <span id="wk-l" style="min-width:150px;text-align:center;font-weight:500"></span>
+            <button class="btn sm" id="wk-next" aria-label="Next week">→</button><button class="btn sm" id="wk-now">This week</button></div></div>
+        <div class="cal-wrap"><div class="cal" id="cal"></div></div>
+        <div class="grid2" style="margin-top:16px">
+          <div class="card"><div class="card-h"><h2>Upcoming</h2><span class="hint">Click a brief to open its agenda and notes</span></div><div class="up" id="up-cal"></div></div>
+          <div class="card"><h2>Brief agenda (standard)</h2><p class="hint" style="margin:4px 0 10px">Every brief follows the same structure, so nothing is missed before quoting.</p>
+            <ol style="margin-left:18px;display:grid;gap:6px;color:var(--ink-2);font-size:14.5px" id="agenda-std"></ol></div>
+        </div>
+      </section>
+
+      <!-- ========== CONTENT ========== -->
+      <section class="view" id="v-content" aria-labelledby="h-content" hidden>
+        <script type="application/json" id="content-defaults" is:inline set:html={contentJson}></script>
+        <div class="head"><div><span class="mono muted">Content</span><h1 id="h-content">Edit the website, <span class="serif">publish when ready.</span></h1></div>
+          <div class="cm-actions"><span class="cm-state" id="cmState"><i></i><span>Loading…</span></span>
+            <button class="btn sm fill" type="button" id="cmPublish" disabled>Publish</button></div></div>
+        <p class="note" role="note" id="cmNote"><b>Demo.</b> Sample data: changes stay in this page only. Signed in, everything here is saved to the database as a draft.</p>
+
+        <div class="cm-tabs" role="tablist" aria-label="Content sections">
+          <button role="tab" aria-selected="true" data-t="media">Media library</button>
+          <button role="tab" aria-selected="false" data-t="archive">Archive</button>
+          <button role="tab" aria-selected="false" data-t="pages">Page text</button>
+          <button role="tab" aria-selected="false" data-t="site">Site settings</button>
+          <button role="tab" aria-selected="false" data-t="hist">History</button>
+        </div>
+
+        <!-- MEDIA -->
+        <div class="cm-pane" data-p="media">
+          <div class="cm-grid2">
+            <div class="cm-drop" id="cmDrop">
+              <input type="file" id="cmFile" multiple accept="video/mp4,video/webm,image/jpeg,image/png,image/webp" aria-label="Choose files to upload">
+              <b>Drop videos, photos or designs here</b><span class="hint">or click to choose · MP4, WebM, JPG, PNG or WebP · up to 50 MB per file</span>
+              <span class="hint">Files are used as they are: export photos and videos for the web first.</span>
+              <label class="cm-kind">Images are uploaded as
+                <select id="cmKind"><option value="photo">Photos</option><option value="design">Designs</option><option value="poster">Video posters</option></select></label>
+            </div>
+            <div class="card cm-store"><div class="card-h"><h2>Storage</h2><span class="hint">Supabase Storage · Free plan</span></div>
+              <div class="cm-meter"><i id="cmMeter" style="width:0"></i></div>
+              <p class="hint"><b id="cmUsed">0 MB</b> of 1 GB used · <span id="cmCount">0</span> uploaded files</p>
+              <p class="hint">Videos above 50 MB: export a lighter MP4 (H.264) for the web.</p></div>
+          </div>
+          <div class="cm-bar"><div class="seg" id="cmFilter"><button aria-pressed="true" data-f="all">All</button><button aria-pressed="false" data-f="video">Videos</button><button aria-pressed="false" data-f="photo">Photos</button><button aria-pressed="false" data-f="design">Designs</button><button aria-pressed="false" data-f="poster">Posters</button></div>
+            <input class="cm-search" id="cmSearch" type="search" placeholder="Search files…" aria-label="Search files"></div>
+          <div class="cm-lib" id="cmLib"></div>
+        </div>
+
+        <!-- ARCHIVE -->
+        <div class="cm-pane" data-p="archive" hidden>
+          <div class="cm-bar"><div class="seg" id="cmArch"><button aria-pressed="true" data-a="film">01 Film</button><button aria-pressed="false" data-a="photos">02 Stills</button><button aria-pressed="false" data-a="design">03 Design</button></div>
+            <span class="hint">Drag ⋮⋮ or use ↑ to reorder · the order here is the order on the website</span>
+            <button class="btn sm" type="button" id="cmAdd">+ Add from media library</button></div>
+          <ol class="cm-list" id="cmList"></ol>
+        </div>
+
+        <!-- PAGE TEXT -->
+        <div class="cm-pane" data-p="pages" hidden>
+          <div class="cm-bar"><label class="cm-kind">Language <select id="cmLang"></select></label>
+            <span class="hint" id="cmLangNote">English is the main language.</span></div>
+          <p class="hint" style="margin:-4px 0 12px">Write <code>_words_</code> to give them the accent style of that spot (italic serif in headings, highlighted in paragraphs). A new line in a heading becomes a line break.</p>
+          <div class="cm-pages">
+            <nav class="cm-pnav" id="cmPnav" aria-label="Page sections"></nav>
+            <form class="card cm-pform" id="cmPform" novalidate></form>
+          </div>
+        </div>
+
+        <!-- SITE SETTINGS -->
+        <div class="cm-pane" data-p="site" hidden>
+          <div class="cm-grid2">
+            <form class="card cm-form" id="cmSiteContact" novalidate><div class="card-h"><h2>Contact</h2><span class="hint">Footer, contact section and form buttons</span></div>
+              <div class="fld"><label for="cm-email">Email</label><input id="cm-email" type="email" data-k="contact.email"></div>
+              <div class="fld"><label for="cm-ig">Instagram link</label><input id="cm-ig" type="url" data-k="contact.instagram" placeholder="https://instagram.com/…"></div>
+              <div class="fld"><label for="cm-wa">WhatsApp number</label><input id="cm-wa" data-k="contact.whatsapp" placeholder="6281234567890" inputmode="tel"><span class="hint">Country code first, digits only. Turns on “Send via WhatsApp”.</span></div>
+              <h3 style="margin-top:6px">About page facts</h3><span class="hint" style="margin-top:-8px">Leave empty to hide the row</span>
+              <div class="row"><div class="fld"><label for="cm-based">Based in</label><input id="cm-based" data-k="about.based" maxlength="40"></div>
+                <div class="fld"><label for="cm-founded">Founded</label><input id="cm-founded" data-k="about.founded" maxlength="10"></div></div>
+              <div class="fld"><label for="cm-team">Team</label><input id="cm-team" data-k="about.team" maxlength="40"></div></form>
+            <form class="card cm-form" id="cmSiteBehaviour" novalidate><div class="card-h"><h2>Landing &amp; protection</h2></div>
+              <div class="setrow"><div><strong>Landing intro</strong><p>Random clips before the site opens</p></div><label class="sw"><span class="sr">Landing intro</span><input type="checkbox" data-k="intro.enabled"><i></i></label></div>
+              <div class="fld"><label for="cm-clip">Seconds per clip</label><input id="cm-clip" data-k="intro.clipSeconds" type="number" min="2" max="8" step="0.1"></div>
+              <div class="setrow"><div><strong>Block right-click &amp; download</strong><p>Casual protection only</p></div><label class="sw"><span class="sr">Protection</span><input type="checkbox" data-k="protect.enabled"><i></i></label></div>
+              <div class="setrow"><div><strong>Watermark on photos</strong><p>“© Syasya&amp;Realis” over stills (needs protection on)</p></div><label class="sw"><span class="sr">Watermark</span><input type="checkbox" data-k="protect.watermark"><i></i></label></div></form>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="cm-pane" data-p="hist" hidden>
+          <div class="card"><div class="card-h"><h2>Published versions</h2><span class="hint">Restore puts an old version back as the draft; publish again to make it live</span></div>
+            <ol class="cm-hist" id="cmHist"></ol></div>
+        </div>
+
+        <div class="cm-dock" id="cmDock" hidden><span id="cmDockText">Unpublished changes</span>
+          <button class="btn sm" type="button" id="cmDiscard">Discard draft</button><button class="btn sm fill" type="button" id="cmPublish2">Publish to website</button></div>
+        <div class="cm-modal" id="cmModal" hidden role="dialog" aria-modal="true" aria-labelledby="cmMt"><div class="card"><div class="card-h"><h2 id="cmMt">Pick from media library</h2><button class="btn sm" type="button" data-close>Close</button></div><div class="cm-lib sm" id="cmPick"></div></div></div>
+      </section>
+
+      <!-- ========== POP-UPS ========== -->
+      <section class="view" id="v-pop" aria-labelledby="h-pop" hidden>
+        <div class="head"><div><span class="mono muted">Pop-up messages</span><h1 id="h-pop">Offers to <span class="serif">active</span> visitors.</h1></div>
+          <span class="hint" style="max-width:44ch">Send a discount, offer or news card to people on the website right now. A click takes them to the contact form with a booking code.</span></div>
+
+        <div class="pc-grid">
+          <form class="card" id="pc-form" style="display:grid;gap:14px" novalidate>
+            <div class="card-h" style="margin:0"><h2>1 · Card settings</h2><span class="hint">Shown exactly as on the right</span></div>
+            <fieldset class="fld"><legend>Type</legend><div class="typeseg">
+              <label><input type="radio" name="pc-type" value="Discount" checked><span>Discount</span></label>
+              <label><input type="radio" name="pc-type" value="Special offer"><span>Special offer</span></label>
+              <label><input type="radio" name="pc-type" value="News"><span>News / update</span></label></div></fieldset>
+            <div class="row">
+              <div class="fld"><label for="pc-val">Big value</label><input id="pc-val" maxlength="14" value="10% off"><span class="hint">e.g. 10% off, Free reel, New</span></div>
+              <div class="fld"><label for="pc-code">Discount code</label><div style="display:flex;gap:6px"><input id="pc-code" maxlength="12" value="NOV10" style="flex:1;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase"><button type="button" class="btn sm" id="pc-gen" aria-label="Generate a new code">↻</button></div><span class="hint">Letters and numbers, max 12</span></div>
+            </div>
+            <div class="fld"><label for="pc-head">Headline</label><input id="pc-head" maxlength="60" value="Your company profile, 10% off this month"></div>
+            <div class="fld"><label for="pc-msg">Message</label><textarea id="pc-msg" maxlength="180">Book a brief before the end of November and get 10% off any company profile video.</textarea><span class="hint"><span id="pc-n">0</span>/180</span></div>
+            <div class="row">
+              <div class="fld"><label for="pc-cta">Button text</label><input id="pc-cta" maxlength="24" value="Claim &amp; book a brief"></div>
+              <div class="fld"><label for="pc-until">Valid until</label><input id="pc-until" type="date"></div>
+            </div>
+            <div class="row">
+              <div class="fld"><label for="pc-for">Applies to</label><select id="pc-for"><option>All services</option><option selected>Company profile videos</option><option>Marketing &amp; business montage</option><option>Product videos</option><option>Photography</option><option>Graphic design</option></select></div>
+              <div class="fld"><label for="pc-delay">Show after</label><select id="pc-delay"><option value="0">Right away</option><option value="5" selected>5 seconds on the page</option><option value="15">15 seconds on the page</option></select></div>
+            </div>
+            <label class="aud"><span style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="pc-once" checked> Show once per visitor (no repeats after closing)</span></label>
+          </form>
+
+          <div class="card" style="position:sticky;top:90px"><div class="card-h"><h2>Preview on the website</h2><span class="hint">Background blurs behind the card</span></div>
+            <div class="stage-pv" aria-label="Pop-up preview"><div class="fake" aria-hidden="true"><b>Stories that<br>move brands.</b><i></i><i class="short"></i></div><div id="pc-preview"></div></div></div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-h"><div><h2>2 · Who receives it</h2><span class="hint">Anonymous visitors on the website right now — no names or personal data until they send the form</span></div>
+            <span class="hint" id="live-n"></span></div>
+          <table class="tbl vis"><caption class="sr">Active visitors</caption><thead><tr>
+            <th scope="col" class="l" style="width:36px"><label><span class="sr">Select all visitors</span><input type="checkbox" id="v-all"></label></th>
+            <th scope="col" class="l">Visitor</th><th scope="col" class="l">Viewing</th><th scope="col" class="l">On site</th><th scope="col" class="l">Device</th><th scope="col" class="l">Location</th><th scope="col" class="l">Visit</th><th scope="col" class="l">Pop-up</th></tr></thead>
+            <tbody id="v-rows"></tbody></table>
+          <div class="card-h" style="margin:16px 0 0;flex-wrap:wrap;gap:14px">
+            <div class="aud" role="radiogroup" aria-label="Send to">
+              <label><input type="radio" name="aud" value="sel" checked><span>Selected visitors (<span id="n-sel">0</span>)</span></label>
+              <label><input type="radio" name="aud" value="all"><span>Send to all active visitors (<span id="n-all">0</span>)</span></label></div>
+            <button class="btn fill" id="pc-send" type="button">Send pop-up ↗</button></div>
+          <p class="hint" style="margin-top:8px">Visitors who already received a pop-up in this visit are skipped automatically.</p>
+        </div>
+
+        <div class="card" style="margin-top:16px"><div class="card-h"><h2>3 · Sent pop-ups</h2><span class="hint">Results update live</span></div>
+          <table class="tbl"><caption class="sr">Sent pop-ups and results</caption><thead><tr><th scope="col">Campaign</th><th scope="col">Code</th><th scope="col">Sent</th><th scope="col">Shown</th><th scope="col">Clicked</th><th scope="col">Enquiries</th><th scope="col">Status</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+            <tbody id="camp-rows"></tbody></table>
+          <p class="hint demo-only" style="margin-top:10px">Sample data. In this preview, a sent pop-up is shown, clicked and turned into an enquiry by a simulated visitor, so you can follow the whole flow.</p></div>
+      </section>
+
+      <!-- ========== REPORTS ========== -->
+      <section class="view" id="v-rep" aria-labelledby="h-rep" hidden>
+        <div class="head"><div><span class="mono muted">Report</span><h1 id="h-rep">Enquiries &amp; briefs</h1></div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="seg" role="group" aria-label="Report period" id="p-seg">
+              <button aria-pressed="true" data-p="m">This month</button><button aria-pressed="false" data-p="l">Last month</button><button aria-pressed="false" data-p="q">Last 90 days</button></div>
+            <button class="btn sm" id="copy-rep">Copy summary</button></div></div>
+        <div class="kpis" id="rep-kpis"></div>
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><div><h2>Enquiries per week</h2><span class="hint" id="wk-sub"></span></div><button class="tbl-toggle" data-tbl="t-weeks">Show table</button></div>
+          <div class="cols" id="ch-weeks"></div><div class="xl" id="ch-weeks-x"></div><div id="t-weeks" hidden></div></div>
+        <div class="rep-grid">
+          <div class="card"><div class="card-h"><div><h2>Conversion funnel</h2><span class="hint">Share of all enquiries reaching each stage</span></div><button class="tbl-toggle" data-tbl="t-fun">Show table</button></div><div class="bars" id="ch-fun"></div><div id="t-fun" hidden></div></div>
+          <div class="card"><div class="card-h"><div><h2>Services requested</h2><span class="hint">An enquiry can ask for more than one</span></div><button class="tbl-toggle" data-tbl="t-svc">Show table</button></div><div class="bars" id="ch-svc"></div><div id="t-svc" hidden></div></div>
+          <div class="card"><div class="card-h"><div><h2>Where enquiries come from</h2></div><button class="tbl-toggle" data-tbl="t-src">Show table</button></div><div class="bars" id="ch-src"></div><div id="t-src" hidden></div></div>
+          <div class="card"><div class="card-h"><div><h2>Brief outcomes</h2></div><button class="tbl-toggle" data-tbl="t-out">Show table</button></div><div class="bars" id="ch-out"></div><div id="t-out" hidden></div></div>
+        </div>
+        <p class="hint demo-only" style="margin-top:14px">All figures here are sample data generated for the design. When the board is connected, the numbers come from the database.</p>
+      </section>
+
+      <!-- ========== SYSTEM & SECURITY ========== -->
+      <section class="view" id="v-sys" aria-labelledby="h-sys" hidden>
+        <div class="head"><div><span class="mono muted">System &amp; security</span><h1 id="h-sys">Simple for clients, <span class="serif">locked</span> for data.</h1></div></div>
+        <div class="seg sub" role="tablist" aria-label="System sections" id="sys-tabs">
+          <button role="tab" aria-selected="true" aria-pressed="true" data-t="over">Overview</button>
+          <button role="tab" aria-selected="false" aria-pressed="false" data-t="log">Activity log</button>
+          <button role="tab" aria-selected="false" aria-pressed="false" data-t="users">Active users</button>
+          <button role="tab" aria-selected="false" aria-pressed="false" data-t="secset">Security settings</button>
+          <button role="tab" aria-selected="false" aria-pressed="false" data-t="check">Checklists</button>
+        </div>
+
+        <!-- overview -->
+        <div class="sys-p" id="t-over" role="tabpanel">
+          <div class="card" style="margin-bottom:16px"><div class="card-h"><h2>Purpose &amp; current status</h2><span class="st" data-s="Brief scheduled" id="sys-status">Demo · sample data</span></div>
+            <p style="color:var(--ink-2);max-width:75ch">This board handles <strong>incoming enquiries</strong>, <strong>structured briefs</strong>, <strong>pop-up offers</strong> and, later, the <strong>website content</strong>. Enquiries, briefs, pop-ups, settings and the activity log are stored in the studio's database (Supabase) and protected by its access rules. The website is not public yet: hosting and the domain are still to be chosen. Content editing is a design preview and is not connected yet. The client form stays the same short form; clients get no extra steps.</p></div>
+          <div class="phases">
+            <div class="phase current"><span class="mono" style="color:var(--rose-t)">Now</span><b>Database and admin connected</b><span class="hint">Enquiries sent from the website form land in this inbox, and pop-ups reach visitors. The site runs on a preview address only.</span></div>
+            <div class="phase"><span class="mono muted">Next · with hosting</span><b>Website goes public</b><span class="hint">Company domain with HTTPS, an email alert for every new enquiry, a spam check on the form, and content editing connected to the website.</span></div>
+            <div class="phase"><span class="mono muted">Later · optional</span><b>Calendar &amp; reminders</b><span class="hint">Briefs sync to Google Calendar with a meeting link, automatic reminders and a weekly report email.</span></div>
+          </div>
+          <div class="card" style="margin-top:16px"><div class="card-h"><h2>How an enquiry flows</h2></div>
+            <svg class="flowsvg" viewBox="0 0 760 290" role="img" aria-label="Every enquiry lands in one inbox, with no extra steps for the client">
+              <defs><marker id="sys-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#6B7A84"/></marker></defs>
+              <text x="24" y="30" font-size="15" font-weight="600" fill="#EEF6FB">Every enquiry lands in one inbox, with no extra steps for the client</text>
+              <g fill="none" stroke="#6B7A84" stroke-width="1.25" marker-end="url(#sys-arrow)">
+                <path d="M184 104H208"/><path d="M368 104H392"/><path d="M552 104H576"/>
+                <path d="M104 132V206"/><path d="M288 132V206"/><path d="M576 234H552"/><path d="M472 206V132"/>
+              </g>
+              <g font-size="13" text-anchor="middle">
+                <rect x="24" y="76" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="104" y="100" font-weight="600" fill="#EEF6FB">Client form</text><text x="104" y="118" font-size="11.5" fill="#8FA6B3">same short form</text>
+                <rect x="208" y="76" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="288" y="100" font-weight="600" fill="#EEF6FB">Database</text><text x="288" y="118" font-size="11.5" fill="#8FA6B3">clients can only add</text>
+                <rect x="392" y="76" width="160" height="56" rx="8" fill="#E20A21" fill-opacity=".14" stroke="#E20A21" stroke-width="2"/><text x="472" y="100" font-weight="600" fill="#EEF6FB">Admin inbox</text><text x="472" y="118" font-size="11.5" fill="#C9E0EC">reply, set stage</text>
+                <rect x="576" y="76" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="656" y="100" font-weight="600" fill="#EEF6FB">Brief &amp; quote</text><text x="656" y="118" font-size="11.5" fill="#8FA6B3">schedule + notes</text>
+                <rect x="24" y="206" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="104" y="230" font-weight="600" fill="#EEF6FB">Chat opens</text><text x="104" y="248" font-size="11.5" fill="#8FA6B3">WhatsApp / email</text>
+                <rect x="208" y="206" width="160" height="56" rx="8" fill="none" stroke="#3D3634" stroke-dasharray="4 4"/><text x="288" y="230" font-weight="600" fill="#EEF6FB">Studio alert</text><text x="288" y="248" font-size="11.5" fill="#e3c07a">email · coming soon</text>
+                <rect x="392" y="206" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="472" y="230" font-weight="600" fill="#EEF6FB">+ Add enquiry</text><text x="472" y="248" font-size="11.5" fill="#8FA6B3">entered by hand</text>
+                <rect x="576" y="206" width="160" height="56" rx="8" fill="none" stroke="#3D3634"/><text x="656" y="230" font-weight="600" fill="#EEF6FB">Direct message</text><text x="656" y="248" font-size="11.5" fill="#8FA6B3">WhatsApp, Instagram</text>
+              </g>
+            </svg>
+            <p class="hint" style="margin-top:8px">When the client presses send, the enquiry is saved and their WhatsApp or email opens at the same moment. Messages that arrive directly are added by hand, so nothing is missed. Until email alerts are set up, check this inbox at least once each working day.</p></div>
+        </div>
+
+        <!-- activity log -->
+        <div class="sys-p" id="t-log" role="tabpanel" hidden>
+          <div class="card"><div class="card-h"><div class="seg" role="group" aria-label="Filter log" id="log-f"></div><button class="btn sm" id="log-csv">Copy as CSV</button></div>
+            <table class="tbl"><caption class="sr">Activity log</caption><thead><tr><th scope="col">Time</th><th scope="col" class="l">Who</th><th scope="col" class="l">Action</th><th scope="col" class="l">Device</th></tr></thead><tbody id="log-rows"></tbody></table>
+            <p class="hint" style="margin-top:10px">Written by the database itself. Entries cannot be edited or deleted from the board, even by the Owner. Entries older than 12 months are deleted automatically every night; the latest 500 are shown.</p></div>
+        </div>
+
+        <!-- active users -->
+        <div class="sys-p" id="t-users" role="tabpanel" hidden>
+          <div class="kpis" id="u-kpis"></div>
+          <div class="card"><div class="card-h"><h2>Team &amp; sessions</h2><button class="btn sm" id="u-all">Sign out all other sessions</button></div>
+            <table class="tbl"><caption class="sr">Team members and their sessions</caption><thead><tr><th scope="col">Person</th><th scope="col" class="l">Role</th><th scope="col" class="l">Status</th><th scope="col" class="l">Device</th><th scope="col" class="l">2FA</th><th scope="col"><span class="sr">Actions</span></th></tr></thead><tbody id="u-rows"></tbody></table></div>
+        </div>
+
+        <!-- security settings -->
+        <div class="sys-p" id="t-secset" role="tabpanel" hidden>
+          <div class="grid2">
+            <form class="card" id="ss-access"><h2>Sign-in &amp; access</h2>
+              <div class="setrow"><div><strong>Require 2FA for every admin</strong><p>One-time code at each sign-in. Locked on.</p></div><label class="sw"><span class="sr">Require 2FA</span><input type="checkbox" checked disabled><span></span></label></div>
+              <div class="setrow"><div><strong>Sign out after inactivity</strong><p>Ends idle sessions on this device automatically; a warning shows 1 minute before.</p></div><label><span class="sr">Session timeout</span><select><option selected>15 minutes</option><option>30 minutes</option><option>1 hour</option></select></label></div>
+              <div class="setrow is-soon"><div><strong>Lock after failed sign-ins <span class="soon">Coming soon</span></strong><p>Not active yet. Sign-in attempts are limited by Supabase's own rate limits.</p></div><label><span class="sr">Failed attempts (not active yet)</span><select disabled><option>5 attempts</option></select></label></div>
+              <div class="setrow is-soon"><div><strong>Email me about new sign-ins <span class="soon">Coming soon</span></strong><p>Needs the studio email setup. New sign-ins are listed in the Activity log.</p></div><label class="sw"><span class="sr">Sign-in alerts (not active yet)</span><input type="checkbox" disabled><span></span></label></div>
+              <div style="margin-top:14px"><button class="btn fill sm">Save</button></div></form>
+            <form class="card" id="ss-data"><h2>Enquiry form &amp; data</h2>
+              <div class="setrow"><div><strong>Invisible spam trap</strong><p>A hidden field that only bots fill in. Always on.</p></div><label class="sw"><span class="sr">Spam trap (always on)</span><input type="checkbox" checked disabled><span></span></label></div>
+              <div class="setrow"><div><strong>Send limit per visitor</strong><p>Stops repeated submissions.</p></div><label><span class="sr">Send limit</span><select><option>2 per hour</option><option selected>3 per hour</option><option>5 per hour</option></select></label></div>
+              <div class="setrow"><div><strong>Keep lost enquiries for</strong><p>Then deleted automatically every night (02:15 WIB). Proposed — to confirm.</p></div><label><span class="sr">Retention</span><select><option>6 months</option><option selected>12 months</option><option>24 months</option></select></label></div>
+              <div class="setrow is-soon"><div><strong>Weekly backup / export <span class="soon">Coming soon</span></strong><p>Not active yet. Until then, use “Copy as CSV” in the Activity log or export from Supabase.</p></div><label><span class="sr">Backup day (not active yet)</span><select disabled><option>Off</option></select></label></div>
+              <div style="margin-top:14px"><button class="btn fill sm">Save</button></div></form>
+          </div>
+        </div>
+
+        <!-- checklists -->
+        <div class="sys-p" id="t-check" role="tabpanel" hidden>
+          <div class="grid2">
+            <div class="card"><h2>Security checklist</h2>
+              <div class="mono muted" style="margin-top:14px">Client side — keep it fast</div>
+              <ul class="check"><li>Same short form as before, no captcha and no extra checkbox</li><li>Invisible spam trap and a send limit</li><li>One line under the send button: details are used only to reply</li><li>Clients can only send an enquiry — never read others</li></ul>
+              <div class="mono muted" style="margin-top:18px">Admin side — locked down</div>
+              <ul class="check"><li>Only team members can open the board, always with 2FA; idle sessions end automatically</li><li>Roles: Owner (settings, team) and Staff (enquiries, briefs)</li><li>Database rules: only signed-in admins read or change enquiries and briefs</li><li>Every change is written to the activity log</li><li>Client messages are shown as plain text, never run as code</li></ul>
+              <div class="mono muted" style="margin-top:18px">Data care</div>
+              <ul class="check"><li>Collect only what is needed to reply and quote</li><li>Lost enquiries are deleted automatically after the retention period</li></ul>
+              <ul class="check open"><li>Weekly export / backup of enquiries and briefs (not built yet)</li></ul></div>
+            <div>
+              <div class="card"><div class="card-h"><h2>Setup before the site goes public</h2><span class="hint" id="setup-n"></span></div>
+                <div class="prog" aria-hidden="true"><i id="setup-bar" style="width:0"></i></div>
+                <div class="tick" id="setup-list">
+                  <label><input type="checkbox" checked disabled><span>Database + admin sign-in for enquiries and briefs (Supabase)</span></label>
+                  <label><input type="checkbox"><span>Static hosting with HTTPS and the company domain (e.g. Cloudflare)</span></label>
+                  <label><input type="checkbox"><span>Studio email for alerts (Resend) and a WhatsApp number on the site</span></label>
+                  <label><input type="checkbox"><span>Short privacy notice page</span></label>
+                  <label><input type="checkbox"><span>Optional: Google Calendar for brief invites</span></label>
+                </div>
+                <p class="hint" style="margin-top:10px">Ticks here are a personal checklist and are not saved.</p></div>
+              <div class="card" style="margin-top:16px"><h2>Open decisions</h2>
+                <ul class="check open" style="margin-top:12px"><li>Which hosting and domain?</li><li>How long to keep lost enquiries (proposed: 12 months)</li><li>Indonesia's Personal Data Protection law (UU No. 27/2022) — confirm obligations with a legal adviser</li><li>Who gets Staff access?</li></ul></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SETTINGS ========== -->
+      <section class="view" id="v-set" aria-labelledby="h-set" hidden>
+        <div class="head"><div><span class="mono muted">Setup</span><h1 id="h-set">Settings</h1></div></div>
+        <div class="grid2">
+          <form class="card" id="f-avail" style="display:grid;gap:14px"><h2>Brief availability</h2>
+            <fieldset class="fld"><legend>Days</legend><div style="display:flex;gap:6px;flex-wrap:wrap" id="days"></div></fieldset>
+            <div class="row"><div class="fld"><label for="s-from">From</label><input id="s-from" type="time" value="09:00"></div><div class="fld"><label for="s-to">To</label><input id="s-to" type="time" value="17:00"></div></div>
+            <div class="row"><div class="fld"><label for="s-dur">Default length</label><select id="s-dur"><option>30 min</option><option selected>45 min</option><option>60 min</option></select></div>
+              <div class="fld"><label for="s-buf">Gap between briefs</label><select id="s-buf"><option>None</option><option selected>15 min</option><option>30 min</option></select></div></div>
+            <div><button class="btn fill sm">Save availability</button></div></form>
+          <form class="card" id="f-notif" style="display:grid;gap:12px"><h2>Notifications <span class="soon">Coming soon</span></h2>
+            <p class="hint">Alerts and reminders are not sent yet: they need the studio email setup (Resend) and, for WhatsApp, a messaging service. Until then, check the Enquiries inbox at least once each working day.</p>
+            <div class="agenda is-soon">
+              <label><input type="checkbox" disabled> Email me when a new enquiry arrives</label>
+              <label><input type="checkbox" disabled> WhatsApp alert for new enquiries</label>
+              <label><input type="checkbox" disabled> Remind me if an enquiry has no reply after 2 hours</label>
+              <label><input type="checkbox" disabled> Reminder 1 hour before each brief</label>
+              <label><input type="checkbox" disabled> Send the client a reminder 1 day before the brief</label>
+              <label><input type="checkbox" disabled> Weekly report every Monday 08:00</label></div></form>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-h"><h2>Team access</h2><button class="btn sm" id="invite">+ Invite</button></div>
+          <table class="tbl"><thead><tr><th scope="col">Person</th><th scope="col">Role</th><th scope="col">2FA</th><th scope="col">Last sign-in</th></tr></thead>
+            <tbody id="team-rows"><tr><td>Admin (you)</td><td>Owner</td><td>On</td><td>Today</td></tr></tbody></table>
+          <p class="hint" style="margin-top:8px">Owner manages settings and team. Staff can handle enquiries and briefs only.</p></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- enquiry / brief drawer -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-h" aria-hidden="true">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h2 id="dr-h">Schedule brief</h2><button class="btn sm" id="dr-x" aria-label="Close">✕</button></div>
+  <div id="dr-body"></div>
+</aside>
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="modal" id="pc-confirm" role="dialog" aria-modal="true" aria-labelledby="cf-h"><div class="card">
+  <h2 id="cf-h">Send this pop-up?</h2><p class="hint" id="cf-t" style="margin:8px 0 16px"></p>
+  <div class="acts"><button class="btn fill" id="cf-yes">Send now</button><button class="btn" id="cf-no">Cancel</button></div></div></div>
+</body>
+</html>

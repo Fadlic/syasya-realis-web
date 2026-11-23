@@ -1,0 +1,42 @@
+---
+import { t, href, alternates, langInfo } from "../i18n/index.mjs";
+const { lang = "en", page = "index" } = Astro.props;
+const N = t(lang).nav;
+const H = (p) => href(lang, p);
+/* the language switcher links to the same page in each language (the 404 page links to each home page) */
+const PATHS = { index: "/", about: "/about", faq: "/faq", guidelines: "/guidelines" };
+const alts = alternates(PATHS[page] || "/");
+const cur = langInfo(lang);
+const globe = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="8" cy="8" r="6.3"/><path d="M1.8 8h12.4M8 1.7c-2 2.2-2 10.4 0 12.6M8 1.7c2 2.2 2 10.4 0 12.6"/></svg>';
+---
+<header class="nav" id="nav">
+  <a href={H("/")} class="brand" aria-label={N.home}><i class="srm light mk" aria-hidden="true"></i><span data-name>Syasya&amp;Realis</span></a>
+  <div class="links">
+    <a class="l" href={H("/about")} data-nav="about">{N.about}</a>
+    <a class="l" href={H("/#work")}>{N.archive}</a>
+    <a class="l" href={H("/#services")}>{N.services}</a>
+    <a class="l" href={H("/guidelines")} data-nav="guidelines">{N.guidelines}</a>
+    <a class="l" href={H("/faq")} data-nav="faq">{N.faq}</a>
+    <details class="lang" id="langPick">
+      <summary aria-label={`${N.language}: ${cur.name}`}><Fragment set:html={globe} /><span class="mono">{cur.short}</span></summary>
+      <ul class="lang-list" role="list">
+        {alts.map((a) => (
+          <li><a href={a.url} hreflang={a.hreflang} lang={a.hreflang} aria-current={a.code === lang ? "true" : undefined} data-lang={a.code}>{a.name}</a></li>
+        ))}
+      </ul>
+    </details>
+    <a class="btn fill" href={H("/#contact")}>{N.start}
+      <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
+    <button class="burger" id="burger" type="button" aria-label={N.menu} aria-controls="sheet" aria-expanded="false"><span></span><span></span></button>
+  </div>
+</header>
+
+<div class="sheet" id="sheet" inert>
+  <nav><a href={H("/about")} data-nav="about">{N.about}</a><a href={H("/#work")}>{N.archive}</a><a href={H("/#services")}>{N.services}</a><a href={H("/guidelines")} data-nav="guidelines">{N.guidelines}</a><a href={H("/faq")} data-nav="faq">{N.faq}</a><a href={H("/#contact")}>{N.contact}</a></nav>
+  <div class="sheet-foot">
+    <div class="sheet-lang mono" role="group" aria-label={N.language}>
+      {alts.map((a) => <a href={a.url} hreflang={a.hreflang} lang={a.hreflang} aria-current={a.code === lang ? "true" : undefined} data-lang={a.code}>{a.short}</a>)}
+    </div>
+    <span class="mono ink-3">{N.disciplinesLine}</span>
+  </div>
+</div>

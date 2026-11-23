@@ -1,0 +1,94 @@
+---
+/* Kerangka semua halaman: <head>, header, footer, lightbox, pop-up, skrip.
+   Dipecah dari V4.4 (satu file + router hash) oleh tools/split_astro.py. */
+/* fonts are self-hosted (no request to Google; only the subsets a page uses are downloaded) */
+import "@fontsource-variable/montserrat";
+import "@fontsource-variable/montserrat/wght-italic.css";
+import "@fontsource-variable/bodoni-moda/opsz.css";
+import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+import "@fontsource-variable/libre-bodoni";
+import "@fontsource-variable/libre-bodoni/wght-italic.css";
+import "@fontsource-variable/geist-mono";
+import "../styles/site.css";
+/* the two faces seen first (headline + body text) are preloaded so text does not wait for the CSS */
+import displayFont from "@fontsource-variable/libre-bodoni/files/libre-bodoni-latin-wght-normal.woff2?url";
+import bodyFont from "@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2?url";
+import Progress from "../components/Progress.astro";
+import Intro from "../components/Intro.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { getContent, siteData, jsonForScript } from "../lib/content.mjs";
+import { t, langInfo, alternates } from "../i18n/index.mjs";
+const { page, intro = false, noindex = false, lang = "en" } = Astro.props;
+const T = t(lang);
+const L = langInfo(lang);
+const META = T.meta[page === "404" ? "notfound" : page] || T.meta.home;
+const title = Astro.props.title || META.title;
+const description = Astro.props.description || META.desc;
+const DEFAULT_DESC = t("en").meta.home.desc;
+/* contact, intro, protection, About facts, testimonials + interface text for the browser scripts */
+const siteJson = jsonForScript({ ...siteData(await getContent(), lang), lang, langName: L.name, i18n: { ...T.js, facts: T.about.facts, services: T.home.services } });
+/* the same page in the other languages (hreflang); the 404 page has none */
+const PATHS = { index: "/", about: "/about", faq: "/faq", guidelines: "/guidelines" };
+const alts = PATHS[page] ? alternates(PATHS[page]) : [];
+const abs = p => (Astro.site ? new URL(p, Astro.site).href : p);
+/* absolute URLs need the live domain: set SITE_URL (e.g. https://syasyarealis.com) when building for hosting */
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : null;
+const ogImage = Astro.site ? new URL("/brand/og-image.jpg", Astro.site).href : "/brand/og-image.jpg";
+const ld = page === "index" && lang === "en" ? {
+  "@context": "https://schema.org", "@type": "ProfessionalService", name: "Syasya&Realis", description: DEFAULT_DESC,
+  founder: { "@type": "Person", name: "Syasya Ahmad" }, image: ogImage, logo: Astro.site ? new URL("/brand/apple-touch-icon.png", Astro.site).href : undefined,
+  url: Astro.site ? Astro.site.href : undefined, knowsAbout: ["Photography", "Videography", "Montage design", "Graphic design"]
+} : null;
+---
+<!DOCTYPE html>
+<html lang={L.hreflang}>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/brand/favicon.png">
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+    <meta name="description" content={description}>
+    <!-- website design and code: John's Tech & Co · photos, videos and designs: Syasya&Realis -->
+    {noindex && <meta name="robots" content="noindex">}
+    {canonical && <link rel="canonical" href={canonical}>}
+    {alts.map(a => <link rel="alternate" hreflang={a.hreflang} href={abs(a.url)}>)}
+    {alts.length > 0 && <link rel="alternate" hreflang="x-default" href={abs(alts[0].url)}>}
+    <meta property="og:site_name" content="Syasya&amp;Realis">
+    <meta property="og:title" content={title}>
+    <meta property="og:description" content={description}>
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content={L.hreflang.replace("-", "_")}>
+    {canonical && <meta property="og:url" content={canonical}>}
+    <meta property="og:image" content={ogImage}>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Syasya&amp;Realis — Visual Narratives &amp; Moving Art">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#0A0807">
+    {ld && <script type="application/ld+json" is:inline set:html={JSON.stringify(ld)} />}
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href={bodyFont} as="font" type="font/woff2" crossorigin>
+    <title>{title}</title>
+  </head>
+  <body class="v2 duo ref sr" data-page={page}>
+    <script type="application/json" id="site-data" is:inline set:html={siteJson}></script>
+    <Progress />
+    {intro && <Intro lang={lang} />}
+    <Header lang={lang} page={page} />
+    <slot />
+    <Footer lang={lang} />
+    <script is:inline defer src="/js/01-settings.js"></script>
+    <script is:inline defer src="/js/02-site.js"></script>
+    <script is:inline defer src="/js/03-pages.js"></script>
+    <script is:inline defer src="/js/04-protect.js"></script>
+    <script is:inline defer src="/js/05-intro.js"></script>
+    <script>import "../scripts/supabase-loader.ts";</script>
+    <script is:inline defer src="/js/config.js"></script>
+    <script is:inline defer src="/js/live.js"></script>
+    <script is:inline defer src="/js/06-interactive.js"></script>
+    <script is:inline defer src="/js/07-identity.js"></script>
+    <script is:inline defer src="/js/08-logo.js"></script>
+    <script is:inline defer src="/js/09-scatter.js"></script>
+  </body>
+</html>

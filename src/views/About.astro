@@ -1,0 +1,79 @@
+---
+/* About page body, shared by /about and /<lang>/about */
+import Base from "../layouts/Base.astro";
+import { getContent, pageText, heading, para } from "../lib/content.mjs";
+import { t, href } from "../i18n/index.mjs";
+const { lang = "en" } = Astro.props;
+const { about: U, nav: N } = t(lang);
+const H = (p) => href(lang, p);
+const A = pageText(await getContent(), lang).about;
+---
+<Base page="about" lang={lang}>
+<main id="about-us">
+  <section class="ab-hero">
+    <div class="eyebrow mono"><span>(About) <span data-name>Syasya&Realis</span></span><span>{U.eyebrow}</span></div>
+    <h1 set:html={heading(A.headline)} />
+    <p class="lead" set:html={para(A.lead)} />
+    <figure class="ab-mark" aria-label={U.mark}><i class="srm light" aria-hidden="true"></i><figcaption class="lockup">Syasya&Realis<span>{U.studio}</span></figcaption></figure>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>{U.eyFounder}</span><span>Syasya Ahmad</span></div>
+    <div class="profile">
+      <div>
+        <p set:html={para(A.p1)} />
+        <p set:html={para(A.p2)} />
+      </div>
+      <dl class="facts-list" id="ab-facts"></dl>
+    </div>
+  </section>
+
+  <section style="padding-top:0" id="ab-name">
+    <div class="eyebrow mono"><span>{U.eyName}</span><span>{U.nameSub}</span></div>
+    <div class="ci-names">
+      <article><h2>Syasya</h2><p class="mono">{U.syasyaTag}</p><p>{U.syasyaText}</p></article>
+      <article><h2><span class="serif">&amp;</span> Realis</h2><p class="mono">{U.realisTag}</p><p>{U.realisText}</p></article>
+    </div>
+  </section>
+
+  <section style="padding-top:0" id="ab-mark">
+    <div class="eyebrow mono"><span>{U.eyMark}</span><span><a href={H("/guidelines")}>{U.guidelinesLink}</a></span></div>
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)" set:html={U.markHeading} />
+    <div class="anat">
+      <figure class="anat-mark" id="anatMark"><i class="srm light" aria-hidden="true"></i>
+        <b class="hs" data-k="s" style="left:24%;top:30%">S</b><b class="hs" data-k="r" style="left:78%;top:52%">R</b>
+        <b class="hs" data-k="amp" style="left:51%;top:24%">&amp;</b><b class="hs" data-k="dia" style="left:56%;top:55%">◆</b></figure>
+      <div>
+        <ol class="anat-list">
+          {U.anat.map(([big, h, p], i) => (
+            <li data-k={["s", "r", "amp", "dia"][i]} tabindex="0">{i === 3 ? <span class="big dia"><i></i></span> : <span class="big">{big}</span>}<div><h3>{h}</h3><p>{p}</p></div></li>
+          ))}
+        </ol>
+        <p class="anat-note">{U.anatNote}</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="eyebrow mono"><span>{U.eyWhy}</span><span>{U.whySub}</span></div>
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)">{U.whyHeading}</h2>
+    <div class="usps">
+      {U.usps.map(([h, p], i) => <article class="usp"><span class="n">0{i + 1}</span><h3>{h}</h3><p>{p}</p></article>)}
+    </div>
+  </section>
+
+  <section style="padding-top:0" id="ab-testi">
+    <div class="eyebrow mono"><span>{U.eyTesti}</span><span>{U.testiSub}</span></div>
+    <h2 class="h2" style="margin-bottom:clamp(36px,7vh,72px)" set:html={U.testiHeading} />
+    <div class="quotes" id="quotes"></div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="ab-cta">
+      <p set:html={U.cta} />
+      <a class="btn fill" href={H("/#contact")}>{N.start}
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11 11 3M5 3h6v6"/></svg></a>
+    </div>
+  </section>
+</main>
+</Base>

@@ -1,0 +1,29 @@
+# Security and cache headers, applied by Cloudflare (Workers static assets / Pages read this file).
+# CSP: everything is served from this site; the only outside host is the studio's Supabase project.
+# 'unsafe-inline' is for styles only (the design sets inline styles from JS); scripts must be files from this site.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://zshqcntmasszdqdeppru.supabase.co; media-src 'self' blob: https://zshqcntmasszdqdeppru.supabase.co; font-src 'self'; connect-src 'self' https://zshqcntmasszdqdeppru.supabase.co wss://zshqcntmasszdqdeppru.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  X-Frame-Options: DENY
+
+# hashed build files never change
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# media and brand files keep their names when replaced: cache for a day
+/media/*
+  Cache-Control: public, max-age=86400
+/brand/*
+  Cache-Control: public, max-age=86400
+
+# scripts keep their names: always revalidate
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+# admin board: never cached, never indexed (also in robots.txt and a noindex meta tag)
+/admin/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
