@@ -120,27 +120,41 @@
       frames.forEach(f => f.style.setProperty("--fw", fw + "px"));
       return fw;
     };
-    size();
-    addEventListener("resize", () => {
+    // frame centres and the reel's height are measured once (and on resize), never inside the scroll handler
+    let centres = [],
+      total = 1;
+    const measure = () => {
       size();
+      centres = frames.map(f => f.offsetLeft + f.offsetWidth / 2);
+      total = Math.max(1, proj.offsetHeight - innerHeight);
+    };
+    measure();
+    addEventListener("resize", () => {
+      measure();
       onScroll();
     });
-    const onScroll = () => {
+    const bar = $("#projBar"),
+      info = $(".proj-info");
+    const render = () => {
+      queued = false;
       const r = proj.getBoundingClientRect(),
-        total = proj.offsetHeight - innerHeight,
         p = Math.min(1, Math.max(0, -r.top / total));
       const pos = p * (n - 1);
       const a = Math.floor(pos),
         fr0 = Math.min(1, Math.max(0, (pos - a - 0.3) / 0.4)),
         ez = fr0 * fr0 * (3 - 2 * fr0),
         b = Math.min(n - 1, a + 1),
-        c = x => frames[x].offsetLeft + frames[x].offsetWidth / 2,
-        ctr = c(a) + (c(b) - c(a)) * ez;
+        ctr = centres[a] + (centres[b] - centres[a]) * ez;
       track.style.transform = `translateX(${innerWidth / 2 - ctr}px)`;
-      $("#projBar").style.width = p * 100 + "%";
-      const i = Math.round(pos),
-        _ = 0;
+      bar.style.transform = `scaleX(${p})`;
+      const i = Math.round(pos);
       if (i !== cur) {
+        // the caption fades in with the new frame (not on the first paint)
+        if (cur !== -1) {
+          info.classList.remove("swap");
+          void info.offsetWidth;
+          info.classList.add("swap");
+        }
         cur = i;
         frames.forEach((f, j) => {
           f.classList.toggle("on", j === i);
@@ -165,8 +179,15 @@
         $("#projCat").textContent = [w.cat, ...w.tags.filter(t => t.toLowerCase() !== w.cat.toLowerCase())].join(" · ");
       }
     };
+    // one render per frame, however many scroll events arrive
+    let queued = false;
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(render);
+    };
     addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    render();
     // dust in the beam
     const cv = $("#dust"),
       cx2 = cv.getContext("2d");

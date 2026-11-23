@@ -343,11 +343,15 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
       strip.appendChild(t);
     });
   };
+  let quiet = false; // set by the arrow keys: the next frame appears without the fade
   const render = () => {
     stage.innerHTML = "";
     stage.classList.remove("in");
-    void stage.offsetWidth;
-    stage.classList.add("in");
+    if (!quiet) {
+      void stage.offsetWidth;
+      stage.classList.add("in");
+    }
+    quiet = false;
     const frame = document.createElement("div");
     frame.className = "lb-frame";
     if (mode === "reel") {
@@ -434,12 +438,21 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
     setTimeout(() => $("#lbClose").focus({ preventScroll: true }), 30);
   });
   const closeLB = () => {
-    lb.classList.remove("open");
-    stage.innerHTML = "";
+    if (!lb.classList.contains("open") || lb.classList.contains("closing")) return;
+    // the page comes back at once (scroll, focus); the viewer fades out over 200ms on top of it
     document.body.style.overflow = "";
     behind().forEach(x => (x.inert = false));
     $("#sheet").inert = !document.body.classList.contains("menu");
     if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    const done = () => {
+      lb.classList.remove("open", "closing");
+      lb.style.pointerEvents = "";
+      stage.innerHTML = "";
+    };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return done();
+    lb.style.pointerEvents = "none";
+    lb.classList.add("closing");
+    setTimeout(done, 200);
   };
   $("#lbClose").onclick = closeLB;
   lb.addEventListener("click", e => {
@@ -448,13 +461,15 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
   addEventListener("keydown", e => {
     if (!lb.classList.contains("open")) return;
     if (e.key === "Escape") closeLB();
-    if (e.key === "ArrowRight") $(".lb-next")?.click();
-    if (e.key === "ArrowLeft") $(".lb-prev")?.click();
+    // arrow keys step through without the fade: keyboard actions never animate
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      quiet = true;
+      $(e.key === "ArrowRight" ? ".lb-next" : ".lb-prev")?.click();
+    }
   });
   if (HOME) $("#playReel").onclick = () => openLB("reel");
 
-  /* nav */
-  addEventListener("scroll", () => $("#nav").classList.toggle("solid", scrollY > 40), { passive: true });
+  /* nav: the solid header is set in 02-site.js with the progress bar */
   /* mobile menu: while closed it is inert, so Tab and screen readers skip its links */
   const sheet = $("#sheet"),
     burger = $("#burger");

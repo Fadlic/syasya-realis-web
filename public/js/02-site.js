@@ -16,9 +16,15 @@
       ...$$('#nav .btn.fill[href*="#contact"]'), // contact has no text link; the CTA marks it so Services is not lit there
     ],
     secs = links.map(a => document.getElementById(a.getAttribute("href").split("#")[1] || ""));
-  const onScroll = () => {
+  const progress = $("#progress"),
+    nav = $("#nav");
+  let queued = false;
+  // progress bar, solid header and active section: one pass per frame
+  const render = () => {
+    queued = false;
     const h = document.documentElement;
-    $("#progress").style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100 + "%";
+    progress.style.transform = `scaleX(${h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)})`;
+    nav.classList.toggle("solid", scrollY > 40);
     let cur = -1;
     secs.forEach((s, i) => {
       if (s && !s.closest("[hidden]") && s.getBoundingClientRect().top < innerHeight * 0.4) cur = i;
@@ -29,8 +35,13 @@
       else a.removeAttribute("aria-current");
     });
   };
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(render);
+  };
   addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+  render();
 
   /* send via WhatsApp / email with the brief pre-filled (home page only) */
   const f = $("#brief");
