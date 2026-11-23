@@ -115,8 +115,26 @@
       });
     });
     let cur = -1;
+    let fwNow = 0;
+    // frames that have played wind round a spool on the left, like film onto a reel
+    const curl = tx => {
+      const R = fwNow * 0.28,
+        spool = innerWidth / 2 - fwNow * 0.56;
+      frames.forEach((f, j) => {
+        const s = spool - (centres[j] + tx);
+        if (reduce || s <= 0) {
+          if (f._c) (f.style.transform = f.style.filter = ""), (f._c = 0);
+          return;
+        }
+        const th = Math.min(s / R, Math.PI * 0.92);
+        f._c = 1;
+        f.style.transform = `translateX(${s - R * Math.sin(th)}px) translateZ(${-R * (1 - Math.cos(th))}px) rotateY(${-th}rad)`;
+        f.style.filter = `brightness(${(0.5 + 0.5 * Math.max(0, Math.cos(th))).toFixed(3)})`;
+      });
+    };
     const size = () => {
       const fw = Math.min(innerWidth < 700 ? innerWidth * 0.84 : innerWidth * 0.58, 980);
+      fwNow = fw;
       frames.forEach(f => f.style.setProperty("--fw", fw + "px"));
       return fw;
     };
@@ -146,6 +164,7 @@
         b = Math.min(n - 1, a + 1),
         ctr = centres[a] + (centres[b] - centres[a]) * ez;
       track.style.transform = `translateX(${innerWidth / 2 - ctr}px)`;
+      curl(innerWidth / 2 - ctr);
       bar.style.transform = `scaleX(${p})`;
       const i = Math.round(pos);
       if (i !== cur) {

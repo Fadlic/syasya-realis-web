@@ -3885,6 +3885,8 @@ body.sr .hero-row .acts {
   top: 0;
   height: 100vh;
   overflow: hidden;
+  perspective: 1600px;
+  perspective-origin: 30% 50%;
   display: grid;
   align-items: center;
 }
@@ -3933,6 +3935,7 @@ body.sr .hero-row .acts {
 }
 .proj-track {
   position: relative;
+  transform-style: preserve-3d;
   display: flex;
   width: max-content;
   will-change: transform;
@@ -3940,6 +3943,7 @@ body.sr .hero-row .acts {
 }
 .pf {
   position: relative;
+  backface-visibility: hidden;
   flex: none;
   width: var(--fw);
   padding: 44px 14px;
