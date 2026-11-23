@@ -3395,6 +3395,21 @@ body.sr .hero-row .acts {
   opacity: 0;
   transform: scale(1.04);
   pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.25s var(--ease-out);
+}
+/* intro exit: the frame breaks into shards (05-intro.js) */
+.shards {
+  position: fixed;
+  inset: 0;
+  z-index: 301;
+  pointer-events: none;
+}
+.shards i {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
 }
 .trailer .reel {
   position: absolute;
@@ -5395,4 +5410,31 @@ body.ref .app .ph-wrap {
   .proj-info.swap > * {
     animation: none;
   }
+}
+
+/* scroll scatter (public/js/09-scatter.js) */
+.sc-w {
+  display: inline-block;
+  white-space: nowrap;
+}
+.sc-l {
+  display: inline-block;
+  will-change: translate, rotate;
+}
+#photography,
+#design {
+  overflow-x: clip;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-l,
+  #gallery .ph-item,
+  #designGrid .d-item {
+    translate: none !important;
+    rotate: none !important;
+    scale: none !important;
+    opacity: 1 !important;
+  }
+}
+.hero h1.sc-loose .ln {
+  overflow: visible;
 }
