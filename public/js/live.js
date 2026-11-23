@@ -170,9 +170,14 @@
       if (form.name.value.trim().length >= 2) return false;
       e.preventDefault();
       say(MESSAGES.invalid_name, "warn");
+      form.name.setAttribute("aria-invalid", "true");
+      form.name.setAttribute("aria-describedby", "saveStatus");
       form.name.focus();
       return true;
     };
+    form.name.addEventListener("input", () => {
+      if (form.name.value.trim().length >= 2) form.name.removeAttribute("aria-invalid");
+    });
     $("#sendWa")?.addEventListener(
       "click",
       async e => {

@@ -5813,3 +5813,16 @@ body:has(#contact .f) footer .fgrid .btn.fill {
 body.ref .svc p {
   color: var(--ink-2);
 }
+
+/* polish: focus ring that reads on red, blue and black — red line with a light inner rim */
+body.v2 :focus-visible {
+  box-shadow: 0 0 0 3px #eef6fb;
+}
+body.v2 input:focus-visible,
+body.v2 textarea:focus-visible {
+  box-shadow: none;
+}
+/* name field flagged when a send is blocked */
+.f input[aria-invalid="true"] {
+  border-color: var(--rose-t);
+}
