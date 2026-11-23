@@ -14,18 +14,8 @@ const A = pageText(await getContent(), lang).about;
     <div class="eyebrow mono"><span>(About) <span data-name>Syasya&Realis</span></span><span>{U.eyebrow}</span></div>
     <h1 set:html={heading(A.headline)} />
     <p class="lead" set:html={para(A.lead)} />
+    <p class="lead" set:html={para(A.p2)} />
     <figure class="ab-mark" aria-label={U.mark}><i class="srm light" aria-hidden="true"></i><figcaption class="lockup">Syasya&Realis<span>{U.studio}</span></figcaption></figure>
-  </section>
-
-  <section style="padding-top:0">
-    <div class="eyebrow mono"><span>{U.eyFounder}</span><span>Syasya Ahmad</span></div>
-    <div class="profile">
-      <div>
-        <p set:html={para(A.p1)} />
-        <p set:html={para(A.p2)} />
-      </div>
-      <dl class="facts-list" id="ab-facts"></dl>
-    </div>
   </section>
 
   <section style="padding-top:0" id="ab-name">

@@ -2022,6 +2022,9 @@ body.v2 .ph-item img {
   margin-top: clamp(24px, 4vh, 40px);
   max-width: 52ch;
 }
+.ab-hero .lead + .lead {
+  margin-top: 16px;
+}
 .profile {
   display: grid;
   grid-template-columns: 1.3fr 1fr;

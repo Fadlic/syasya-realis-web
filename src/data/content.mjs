@@ -198,8 +198,7 @@ export const PAGE_FIELDS = [
     fields: [
       ["Headline", "about.headline", 70],
       ["Intro", "about.lead", 320, "area"],
-      ["Founder paragraph 1", "about.p1", 320, "area"],
-      ["Founder paragraph 2", "about.p2", 320, "area"],
+      ["Intro paragraph 2", "about.p2", 320, "area"],
     ],
   },
   {
