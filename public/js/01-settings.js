@@ -116,7 +116,7 @@ const DISCIPLINES = ARCHIVE.disciplines || ["Photography", "Videography", "Monta
   const HOME = !!$("#top");
   if (HOME) {
     /* hero */
-    const hero = vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4", 0, { autoplay: true, preload: "auto" });
+    const hero = vid(SITE.showreel, SITE.showreelPoster, "showreel.mp4", 0, { autoplay: true, preload: matchMedia("(max-width: 700px)").matches ? "metadata" : "auto" });
     $("#heroMedia").appendChild(hero);
     hero.play && hero.play().catch(() => {});
 

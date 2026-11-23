@@ -2567,7 +2567,7 @@ body.protect.no-wm .lb-stage::after {
 
 /* ===== palette v3 fixes ===== */
 :root {
-  --rose-t: #f0283c;
+  --rose-t: #f43d50;
 }
 /* small red text uses the brighter red so it stays readable on black (4.8:1) */
 body.v2 .eyebrow .num,
@@ -2839,8 +2839,8 @@ body.ref {
     ),
     #0a0807;
   --tri-blue:
-    radial-gradient(55% 75% at 100% 100%, #e20a21 0%, #8a0713 22%, #0a0807 40%, rgba(10, 8, 7, 0) 46%),
-    radial-gradient(130% 120% at 12% 0%, #d6f1fc 0%, #9dd9f3 40%, #6db9de 74%, #3f86ac 100%);
+    radial-gradient(42% 60% at 100% 100%, #e20a21 0%, #8a0713 22%, #0a0807 40%, rgba(10, 8, 7, 0) 46%),
+    radial-gradient(130% 120% at 12% 0%, #d6f1fc 0%, #9dd9f3 45%, #6db9de 100%);
 }
 /* hero: red bloom into black, faint blue rim light */
 body.ref .hero-media .ph::before {
@@ -5712,4 +5712,104 @@ main section[tabindex="-1"]:focus {
   .nav.tuck {
     translate: none;
   }
+}
+
+/* ===== Impeccable pass: readability, tap targets, phone layout (fonts untouched) ===== */
+/* contrast: dark text on blue, white on red, never mid-tone on either */
+body.ref #process .steps .step .mono {
+  color: #fff;
+}
+body.ref #ab-mark .anat-note {
+  color: #0a0807;
+}
+body.ref .ci-type p {
+  color: #eef6fb;
+}
+body.ref #brand-guidelines section:has(> .ci-pal) .eyebrow span,
+body.ref #brand-guidelines section:has(> .ci-pal) .num {
+  color: #fff;
+}
+.lb-eye {
+  color: var(--rose-t);
+}
+.trailer .seg span {
+  color: rgba(157, 217, 243, 0.66);
+}
+.f input::placeholder,
+.f textarea::placeholder {
+  color: var(--ink-3);
+  opacity: 1;
+}
+@media (max-width: 700px) {
+  /* on a phone the red corner shrinks and the second label straddles red and blue: set it on a black chip */
+  body.ref #process .eyebrow span:last-child,
+  body.ref #ab-mark .eyebrow span:last-child {
+    color: #eef6fb;
+    background: #0a0807;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+}
+
+/* functional labels never below 11px */
+.trailer .cap,
+.trailer .cap b {
+  font-size: 11px;
+}
+.lockup span {
+  font-size: max(11px, 0.62em);
+}
+.app dt,
+.pf .edge,
+.arch-jump a .mono {
+  font-size: 11px;
+}
+
+/* tap targets ≥ 44px; the hit area grows, the drawing stays the same */
+.burger::before,
+.foot a::before,
+.about-more::before,
+footer .fgrid > div > a::before,
+#ab-mark .eyebrow a::before {
+  content: "";
+  position: absolute;
+  inset: -8px -4px;
+}
+.burger::before {
+  inset: -14px -9px;
+}
+.foot a,
+.about-more,
+footer .fgrid > div > a,
+#ab-mark .eyebrow a {
+  position: relative;
+}
+@media (max-width: 760px) {
+  .lb-nav {
+    width: 44px;
+    height: 44px;
+  }
+  .lb-th {
+    width: 60px;
+    height: 44px;
+  }
+}
+
+/* phone: two photo columns instead of one long strip */
+@media (max-width: 700px) {
+  .gallery {
+    columns: 2;
+    column-gap: 8px;
+  }
+  .ph-item {
+    margin-bottom: 8px;
+  }
+}
+
+/* home: the contact form is the one call to action; the footer repeats it everywhere else */
+body:has(#contact .f) footer .fgrid .btn.fill {
+  display: none !important;
+}
+body.ref .svc p {
+  color: var(--ink-2);
 }
