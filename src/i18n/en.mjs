@@ -137,27 +137,12 @@ export const ui = {
     whySub: "What you get",
     whyHeading: "Why brands work with us.",
     usps: [
-      [
-        "One team, end to end",
-        "Video, photo and design under one roof. One contact, one consistent look across everything you publish.",
-      ],
-      [
-        "A structured brief",
-        "Every project starts with the same brief: goal, audience, formats, references, timeline and budget. No guesswork later.",
-      ],
-      [
-        "Every format from one production",
-        "Masters plus 16:9, 9:16, 1:1 and 4:5 cut-downs, ready for your website, social channels and ads.",
-      ],
-      [
-        "Story before polish",
-        "We plan around what your audience should feel and do — then finish with colour, sound and motion.",
-      ],
-      ["A clear quote first", "Scope, deliverables and revision rounds are agreed in writing before any work starts."],
-      [
-        "Easy to reach",
-        "Brief us on WhatsApp or by email in two minutes. You get a reply and a time for the brief — not a long form.",
-      ],
+      ["Work that brings results", "We don’t just make things look good. Every video and design is made to grab attention and help your business grow."],
+      ["Made to fit your brand", "We take time to learn your style and audience, so everything we create looks and feels truly yours."],
+      ["Fast and reliable delivery", "Need it soon? We work fast, stick to deadlines, and keep you updated so your launch stays on track."],
+      ["Everything in one place", "Video, photo, and design under one roof. You deal with one team instead of chasing different freelancers."],
+      ["Clear pricing upfront", "We agree on the exact price, work, and edits before we start. No hidden fees or surprise costs later."],
+      ["More value from every shoot", "One project gives you everything you need: main videos, social clips, and photos ready to post anywhere."],
     ],
     eyTesti: "(04) Testimonials",
     testiSub: "Clients",

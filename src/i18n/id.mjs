@@ -135,30 +135,12 @@ export const ui = {
     whySub: "Yang Anda dapatkan",
     whyHeading: "Mengapa brand bekerja sama dengan kami.",
     usps: [
-      [
-        "Satu tim, dari awal sampai akhir",
-        "Video, foto, dan desain dalam satu atap. Satu kontak, satu tampilan yang konsisten di semua yang Anda publikasikan.",
-      ],
-      [
-        "Brief yang terstruktur",
-        "Setiap proyek dimulai dengan brief yang sama: tujuan, audiens, format, referensi, jadwal, dan anggaran. Tidak ada tebak-tebakan di kemudian hari.",
-      ],
-      [
-        "Semua format dari satu produksi",
-        "Master ditambah potongan 16:9, 9:16, 1:1, dan 4:5, siap untuk situs web, media sosial, dan iklan Anda.",
-      ],
-      [
-        "Cerita sebelum polesan",
-        "Kami merancang dari apa yang harus dirasakan dan dilakukan audiens Anda — lalu menyempurnakannya dengan warna, suara, dan gerak.",
-      ],
-      [
-        "Penawaran jelas di awal",
-        "Lingkup, hasil kerja, dan jumlah revisi disepakati tertulis sebelum pekerjaan dimulai.",
-      ],
-      [
-        "Mudah dihubungi",
-        "Kirim brief lewat WhatsApp atau email dalam dua menit. Anda mendapat balasan dan jadwal brief — bukan formulir panjang.",
-      ],
+      ["Karya yang memberi hasil", "Kami tidak sekadar membuat sesuatu terlihat bagus. Setiap video dan desain dibuat untuk menarik perhatian dan membantu bisnis Anda tumbuh."],
+      ["Sesuai dengan brand Anda", "Kami meluangkan waktu untuk memahami gaya dan audiens Anda, sehingga semua yang kami buat benar-benar terasa milik Anda."],
+      ["Pengerjaan cepat dan andal", "Butuh segera? Kami bekerja cepat, menepati tenggat, dan terus memberi kabar agar peluncuran Anda tetap sesuai rencana."],
+      ["Semua dalam satu tempat", "Video, foto, dan desain dalam satu atap. Anda cukup berurusan dengan satu tim, tanpa perlu mencari freelancer yang berbeda-beda."],
+      ["Harga jelas sejak awal", "Kami sepakati harga, pekerjaan, dan revisi secara pasti sebelum mulai. Tanpa biaya tersembunyi atau tambahan tak terduga."],
+      ["Nilai lebih dari setiap sesi", "Satu proyek memberi semua yang Anda butuhkan: video utama, klip media sosial, dan foto yang siap diunggah di mana saja."],
     ],
     eyTesti: "(04) Testimoni",
     testiSub: "Klien",

@@ -135,30 +135,12 @@ export const ui = {
     whySub: "Apa yang anda peroleh",
     whyHeading: "Mengapa jenama bekerjasama dengan kami.",
     usps: [
-      [
-        "Satu pasukan, dari mula hingga akhir",
-        "Video, foto dan reka bentuk di bawah satu bumbung. Satu orang hubungan, satu rupa yang konsisten dalam semua yang anda terbitkan.",
-      ],
-      [
-        "Taklimat yang tersusun",
-        "Setiap projek bermula dengan taklimat yang sama: matlamat, sasaran, format, rujukan, jadual dan bajet. Tiada teka-teki kemudian.",
-      ],
-      [
-        "Semua format daripada satu produksi",
-        "Fail induk serta potongan 16:9, 9:16, 1:1 dan 4:5, sedia untuk laman web, media sosial dan iklan anda.",
-      ],
-      [
-        "Cerita sebelum kemasan",
-        "Kami merancang berdasarkan apa yang patut dirasa dan dilakukan oleh penonton anda — kemudian menyempurnakannya dengan warna, bunyi dan gerakan.",
-      ],
-      [
-        "Sebut harga yang jelas dahulu",
-        "Skop, hasil kerja dan pusingan semakan dipersetujui secara bertulis sebelum kerja bermula.",
-      ],
-      [
-        "Mudah dihubungi",
-        "Hantar taklimat melalui WhatsApp atau e-mel dalam dua minit. Anda mendapat balasan dan masa untuk taklimat — bukan borang yang panjang.",
-      ],
+      ["Kerja yang membawa hasil", "Kami bukan sekadar membuat sesuatu nampak cantik. Setiap video dan reka bentuk dihasilkan untuk menarik perhatian dan membantu perniagaan anda berkembang."],
+      ["Dibuat sesuai jenama anda", "Kami meluangkan masa untuk memahami gaya dan audiens anda, supaya semua yang kami hasilkan benar-benar terasa milik anda."],
+      ["Penghantaran pantas dan boleh dipercayai", "Perlu cepat? Kami bekerja pantas, menepati tarikh akhir dan sentiasa memberi maklum balas supaya pelancaran anda kekal mengikut jadual."],
+      ["Semua di satu tempat", "Video, foto dan reka bentuk di bawah satu bumbung. Anda berurusan dengan satu pasukan, tanpa perlu mencari pekerja bebas yang berbeza."],
+      ["Harga jelas dari awal", "Kami persetujui harga, kerja dan suntingan dengan tepat sebelum bermula. Tiada caj tersembunyi atau kos mengejut kemudian."],
+      ["Lebih nilai dari setiap penggambaran", "Satu projek memberi semua yang anda perlukan: video utama, klip media sosial dan foto yang sedia dimuat naik di mana-mana."],
     ],
     eyTesti: "(04) Testimoni",
     testiSub: "Klien",
