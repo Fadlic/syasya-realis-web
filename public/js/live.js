@@ -403,6 +403,11 @@
         .filter(Boolean)
         .join(" · ");
       const last = document.activeElement;
+      po.classList.remove("out");
+      $("#po-code").classList.remove("copied");
+      const hint = $("#po-code span");
+      hint.dataset.hint ??= hint.textContent;
+      hint.textContent = hint.dataset.hint;
       po.classList.add("show");
       po.setAttribute("aria-hidden", "false");
       document.body.classList.add("po-open");
@@ -411,10 +416,10 @@
       event(c, "Shown", deliveryId);
       store.set(`studio-popup-${c.id}`, "1");
       const close = ev => {
-        po.classList.remove("in");
+        po.classList.add("out"); // quick exit; .in stays so the lines do not blink out first
         document.body.classList.remove("po-open");
         po.setAttribute("aria-hidden", "true");
-        setTimeout(() => po.classList.remove("show"), 450);
+        setTimeout(() => po.classList.remove("show", "in", "out"), 220);
         if (ev) event(c, ev, deliveryId);
         last && last.focus && last.focus();
         cleanup();
@@ -440,6 +445,7 @@
         try {
           await navigator.clipboard.writeText(c.code);
           $("#po-code span").textContent = tr("copiedCode", "Copied ✓");
+          $("#po-code").classList.add("copied");
         } catch {
           /* storage or clipboard blocked: nothing to do */
         }

@@ -5447,3 +5447,202 @@ footer {
 .hero h1.sc-loose .ln {
   overflow: visible;
 }
+
+/* ===== pop-up card motion =====
+   Enter: the veil fades, the card rises and settles on the drawer curve, then its lines arrive in order.
+   Exit is quicker and quieter than the entrance. Press feedback on every button; copying the code
+   "stamps" it. Reduced motion: opacity only. */
+.po {
+  transition: opacity 0.3s var(--ease-out);
+}
+.po.in.out {
+  opacity: 0;
+  transition-duration: 0.2s;
+}
+/* the card hangs like a price tag: it drops on its string, swings, settles, then sways gently */
+.pcard {
+  opacity: 0;
+  transform: none;
+  transform-origin: 50% 19px; /* the eyelet */
+  transition: opacity 0.2s var(--ease-out);
+}
+.pcard::before {
+  /* eyelet */
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: #0b0a0a;
+  border: 2px solid rgba(232, 222, 212, 0.6);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9), 0 1px 0 rgba(255, 255, 255, 0.08);
+  z-index: 1;
+}
+.pcard::after {
+  /* string, running up out of the screen */
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 19px);
+  width: 1.5px;
+  height: 100vh;
+  margin-left: -0.75px;
+  background: linear-gradient(to top, rgba(232, 222, 212, 0.75), rgba(232, 222, 212, 0.35) 40%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+.po.in .pcard {
+  opacity: 1;
+  animation:
+    poHang 1.5s both,
+    poSway 6s ease-in-out 1.5s infinite;
+}
+.po.in.out .pcard {
+  opacity: 0;
+  animation: none;
+  translate: 0 -14px;
+  transition:
+    opacity 0.2s var(--ease-out),
+    translate 0.2s var(--ease-out);
+}
+@keyframes poHang {
+  0% {
+    translate: 0 -70vh;
+    rotate: -10deg;
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0.4);
+  }
+  10% {
+    opacity: 1;
+  }
+  24% {
+    translate: 0 14px;
+    rotate: 9deg;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+  }
+  36% {
+    translate: 0 -5px;
+    rotate: -6deg;
+    animation-timing-function: ease-in-out;
+  }
+  50% {
+    translate: 0 0;
+    rotate: 3.8deg;
+    animation-timing-function: ease-in-out;
+  }
+  64% {
+    rotate: -2.2deg;
+    animation-timing-function: ease-in-out;
+  }
+  78% {
+    rotate: 1.1deg;
+    animation-timing-function: ease-in-out;
+  }
+  90% {
+    rotate: -0.4deg;
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+    opacity: 1;
+  }
+}
+@keyframes poSway {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  25% {
+    rotate: 0.9deg;
+  }
+  75% {
+    rotate: -0.9deg;
+  }
+}
+.pcard > :not(.x) {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.po.in .pcard > :not(.x) {
+  animation: poLine 0.4s var(--ease-out) forwards;
+  animation-delay: calc(0.4s + var(--i, 0) * 0.05s);
+}
+.pcard .po-eye { --i: 0; }
+.pcard .po-big { --i: 1; }
+.pcard h3 { --i: 2; }
+.pcard p { --i: 3; }
+.pcard .code { --i: 4; }
+.pcard .cta { --i: 5; }
+.pcard .fine { --i: 6; }
+.po.in .pcard .po-big {
+  animation-name: poBig;
+  animation-duration: 0.55s;
+}
+@keyframes poLine {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes poBig {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.92);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.pcard .x,
+.pcard .code,
+.pcard .cta {
+  transition-property: background-color, color, border-color, transform;
+  transition-duration: 0.2s, 0.2s, 0.2s, 0.16s;
+  transition-timing-function: ease, ease, ease, var(--ease-out);
+}
+.pcard .x:active,
+.pcard .code:active,
+.pcard .cta:active {
+  transform: scale(0.97);
+}
+.pcard .code:hover {
+  border-color: var(--rose);
+}
+.pcard .code.copied {
+  border-style: solid;
+  background: rgba(226, 10, 33, 0.12);
+}
+.pcard .code.copied b {
+  animation: poStamp 0.32s var(--ease-out);
+}
+@keyframes poStamp {
+  40% {
+    transform: scale(1.08);
+  }
+}
+.pcard .code b {
+  display: inline-block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pcard,
+  .po.out .pcard,
+  .po.in .pcard,
+  .pcard > :not(.x),
+  .po.in .pcard > :not(.x) {
+    transform: none !important;
+    translate: none !important;
+    rotate: none !important;
+    animation: none !important;
+    filter: none !important;
+  }
+  .pcard > :not(.x) {
+    opacity: 1;
+  }
+}
